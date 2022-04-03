@@ -1,2 +1,7 @@
 # laravel_test
-oumasan web
+
+構成
+
+* docker-compose.yml
+* docker_files
+* backend
