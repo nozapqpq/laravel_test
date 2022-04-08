@@ -59,4 +59,21 @@ class ScrapingController extends Controller
         }
         */
     }
+    public function google_search() {
+        $url_format = 'https://www.google.co.jp/search?q=%query%&num=%num%';
+        $keyword = '出走馬 屈腱炎';
+        $replace = [urlencode($keyword), 5];
+        $search = ['%query%', '%num%'];
+        $url = str_replace($search, $replace, $url_format);
+        $client = new Client();
+        $crawler = $client->request('GET', $url);
+
+        $crawler->filter('div.vvjwJb')->each(function($node) use (&$ix, &$ary) {
+            $ary[$ix] = $node->text();
+            $ix++;
+        });
+        foreach ($ary as $t => $w) {
+            print $w."<br>";
+        }
+    }
 }

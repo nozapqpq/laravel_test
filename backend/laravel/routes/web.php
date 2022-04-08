@@ -17,6 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('netkeiba','App\Http\Controllers\ScrapingController@netkeiba');
+Route::get('google_search','App\Http\Controllers\ScrapingController@google_search');
 
 /*
  * ***パッケージ、composer関連の情報***
