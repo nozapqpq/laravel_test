@@ -19,6 +19,7 @@ Route::get('/', function () {
 Route::get('netkeiba','App\Http\Controllers\ScrapingController@netkeiba');
 Route::get('google_search','App\Http\Controllers\ScrapingController@google_search');
 Route::post('kaisai', 'App\Http\Controllers\KaisaiImportController@index');
+Route::get('home', 'App\Http\Controllers\HomeController@index');
 
 /*
  * ***パッケージ、composer関連の情報***
