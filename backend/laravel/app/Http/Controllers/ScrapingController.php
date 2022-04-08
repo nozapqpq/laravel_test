@@ -20,7 +20,7 @@ class ScrapingController extends Controller
     public function netkeiba() {
         $client = new Client(HttpClient::create(['timeout' => 60]));
 
-        $items = DB::table('kaisai')->where('year','=',2022)->where('month','=',1)->where('day','=',16)->get();
+        $items = DB::table('kaisai')->where('year','=',2022)->where('month','=',3)->where('day','=',27)->get();
         foreach ($items as $item) {
             
             $getUrl = 'https://race.netkeiba.com/race/shutuba.html?race_id='.$item->race_id.'01';
@@ -44,7 +44,6 @@ class ScrapingController extends Controller
                 $ix++;
             });
         }
-        /*
         foreach ($horsename as $t => $w) {
             print $w. "<br>";
         }
@@ -57,7 +56,6 @@ class ScrapingController extends Controller
         foreach ($trainer as $t => $w) {
             print $w. "<br>";
         }
-        */
     }
     public function google_search() {
         $url_format = 'https://www.google.co.jp/search?q=%query%&num=%num%';
