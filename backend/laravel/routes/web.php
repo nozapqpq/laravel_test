@@ -21,6 +21,16 @@ Route::get('google_search','App\Http\Controllers\ScrapingController@google_searc
 Route::post('kaisai', 'App\Http\Controllers\KaisaiImportController@index');
 Route::get('home', 'App\Http\Controllers\HomeController@index');
 
+Route::get('page_abstruct', 'App\Http\Controllers\PageAbstructController@index');
+Route::get('page_routing', 'App\Http\Controllers\PageAbstructController@routing');
+Route::get('page_request', 'App\Http\Controllers\PageAbstructController@request');
+Route::get('page_query_builder', 'App\Http\Controllers\PageAbstructController@query_builder');
+Route::get('page_orm', 'App\Http\Controllers\PageAbstructController@orm');
+Route::get('page_di', 'App\Http\Controllers\PageAbstructController@di');
+Route::get('page_cert', 'App\Http\Controllers\PageAbstructController@cert');
+Route::get('page_test', 'App\Http\Controllers\PageAbstructController@test');
+Route::get('page_artisan', 'App\Http\Controllers\PageAbstructController@artisan');
+
 /*
  * ***パッケージ、composer関連の情報***
  * 最初に下記をcomposerに取り込む必要がある。取り込むとcomposer.lockが更新される
@@ -43,4 +53,11 @@ Route::get('home', 'App\Http\Controllers\HomeController@index');
 
  * できたら次はControllerの作成
  * php artisan make:controller HOGEController
+ * 
+ * viewについて
+ * Laravelでビューを新規作成するとき注意するべきポイントは
+ *
+ * 1. ビューを新規作成するコマンドは無い
+ * 2. ビューの格納場所はresources\views配下に格納する
+ * 3. 拡張子は【.blade.php】とする
  */
