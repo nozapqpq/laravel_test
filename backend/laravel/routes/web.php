@@ -24,6 +24,7 @@ Route::get('home', 'App\Http\Controllers\HomeController@index');
 Route::get('page_abstruct', 'App\Http\Controllers\PageAbstructController@index');
 Route::get('page_routing', 'App\Http\Controllers\PageAbstructController@routing');
 Route::get('page_request', 'App\Http\Controllers\PageAbstructController@request');
+Route::post('request_post', 'App\Http\Controllers\RequestSampleController@request_post');
 Route::get('page_query_builder', 'App\Http\Controllers\PageAbstructController@query_builder');
 Route::get('page_orm', 'App\Http\Controllers\PageAbstructController@orm');
 Route::get('page_di', 'App\Http\Controllers\PageAbstructController@di');
