@@ -10,13 +10,13 @@
 <body>
     <div class="abstruct">
         <h2>Laravelとは</h2>
-          <p>MVCのWebアプリケーション開発用のPHPで書かれたWebアプリケーションフレームワークです</p><br>
+          <p>MVCのWebアプリケーション開発用のPHPで書かれたWebアプリケーションフレームワークです</p>
           <a href="https://ja.wikipedia.org/wiki/Laravel">詳しくはこちら</a><br>
         <h2>メリット、デメリット</h2>
           メリットはよく使われていて便利なこと<br>
           デメリットは重いこと<br>
           <a href="https://city3939.com/laravel-merit-and-demerit/">こちら</a><br>
-        <h2>他のPHPフレームワーク(CakePHP)との違い</h2><br>
+        <h2>他のPHPフレームワーク(CakePHP)との違い</h2>
           CakePHPは速く、Laravelは便利です<br>
           <a href="https://qiita.com/testMenta339/items/6017417e536af0adcd01">詳しくはこちら</a><br>
 
