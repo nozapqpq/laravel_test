@@ -23,23 +23,23 @@ class PageAbstructController extends Controller
     }
 
     public function orm() {
-        return view('orm');
+        return view('page_orm');
     }
 
     public function di() {
-        return view('di');
+        return view('page_di');
     }
 
     public function cert() {
-        return view('cert');
+        return view('page_cert');
     }
 
     public function test() {
-        return view('test');
+        return view('page_test');
     }
 
     public function artisan() {
-        return view('artisan');
+        return view('page_artisan');
     }
 
 
