@@ -26,6 +26,7 @@ Route::get('page_routing', 'App\Http\Controllers\PageAbstructController@routing'
 Route::get('page_request', 'App\Http\Controllers\PageAbstructController@request');
 Route::post('request_post', 'App\Http\Controllers\RequestSampleController@request_post');
 Route::get('page_query_builder', 'App\Http\Controllers\PageAbstructController@query_builder');
+Route::post('query_sample', 'App\Http\Controllers\IroiroController@query_sample');
 Route::get('page_orm', 'App\Http\Controllers\PageAbstructController@orm');
 Route::get('page_di', 'App\Http\Controllers\PageAbstructController@di');
 Route::get('page_cert', 'App\Http\Controllers\PageAbstructController@cert');
