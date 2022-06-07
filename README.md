@@ -17,6 +17,12 @@
 
 * docker-compose up -d
 
+## 新規laravelプロジェクト生成
+
+* dockerからターミナルを起動し、appコンテナから、laravelディレクトリの中身を空にした状態で行う
+* composer create-project laravel/laravel
+* php artisan --versionでv9.0以上で生成されていることを確認する
+
 ## kaisai.csvについて
 
 * レース検索の☆6
