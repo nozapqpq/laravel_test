@@ -12,7 +12,8 @@
 /database
 /lang
 /public
-/resources
+/resources/css
+/resources/js
 /routes/api.php
 /routes/channels.php
 /routes/console.php
