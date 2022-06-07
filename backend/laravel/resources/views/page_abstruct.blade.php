@@ -21,6 +21,7 @@
           <a href="https://qiita.com/testMenta339/items/6017417e536af0adcd01">詳しくはこちら</a><br>
 
         <h2>Laravelの機能について</h2>
+        チュートリアルをなぞる？<br>
         <a href="{{ url('page_routing') }}">ルーティング</a><br>
         <a href="{{ url('page_request') }}">リクエスト処理</a><br>
         <a href="{{ url('page_query_builder') }}">クエリビルダー</a><br>
@@ -31,6 +32,9 @@
         <a href="{{ url('page_artisan') }}">Artisanコンソール</a><br>
 
         <h2>使っていてやりやすかったこと、やりづらかったこと</h2>
+
+        htmlファイルでやりたい操作についてコントローラを用意して書いてルーティングするだけでいろいろなことができて便利そう
+        htmlの中に処理が書けるbladeの仕組みを理解すると色々やりやすそう<br>
         
     </div>
 </body>
