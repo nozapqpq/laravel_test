@@ -3,12 +3,14 @@
 /app/Exceptions
 /app/Http/Middleware
 /app/Http/Kernel.php
-/app/Models
-/app/Providers
+/app/Models/User.php
+/app/Providers/*.php
+!/app/Providers/CalculationServiceProvider.php
 /public/hot
 /public/storage
 /bootstrap
-/config
+/config/*.php
+!/config/app.php
 /database
 /lang
 /public
