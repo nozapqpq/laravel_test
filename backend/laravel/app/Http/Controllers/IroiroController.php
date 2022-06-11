@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 // ORM用のデータベースormsと関連付けて作成したクラスormを使用する
 use App\Models\models\orm;
+// サービスコンテナ説明用の加減乗除クラス
+use App\Components\Calculation;
 
 class IroiroController extends Controller
 {
@@ -56,6 +58,22 @@ class IroiroController extends Controller
         */
 
         $sample = orm::all();
-        return view('orm_sample',['sample'=>$sample]);
+        return view('query_sample',['sample'=>$sample]);
+    }
+
+    // サービスコンテナでのDIの説明用、コンストラクタインジェクション
+    // di_sampleメソッドがCalculationクラスに依存しないようにしてそのクラスのメソッド(add, sub, ..)を使えるようにする
+    public function __construct(Calculation $Calculation) {
+        $this->Calculation = $Calculation;
+    }
+
+    public function di_sample() {
+        $result = [
+            'add' => $this->Calculation->add(1, 1),
+            'sub' => $this->Calculation->sub(2, 1),
+            'mul' => $this->Calculation->mul(3, 2),
+            'div' => $this->Calculation->div(4, 2),
+        ];
+        return view('query_sample',['sample'=>implode($result)]);
     }
 }

@@ -30,6 +30,7 @@ Route::post('query_sample', 'App\Http\Controllers\IroiroController@query_sample'
 Route::get('page_orm', 'App\Http\Controllers\PageAbstructController@orm');
 Route::post('orm_sample', 'App\Http\Controllers\IroiroController@orm_sample');
 Route::get('page_di', 'App\Http\Controllers\PageAbstructController@di');
+Route::post('di_sample', 'App\Http\Controllers\IroiroController@di_sample');
 Route::get('page_cert', 'App\Http\Controllers\PageAbstructController@cert');
 Route::get('page_test', 'App\Http\Controllers\PageAbstructController@test');
 Route::get('page_artisan', 'App\Http\Controllers\PageAbstructController@artisan');
