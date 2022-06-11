@@ -25,7 +25,7 @@
         <a href="{{ url('page_routing') }}">ルーティング</a><br>
         <a href="{{ url('page_request') }}">リクエスト処理</a><br>
         <a href="{{ url('page_query_builder') }}">クエリビルダー</a><br>
-        <a href="{{ url('page_orm') }}">ORM</a><br>
+        <a href="{{ url('page_orm') }}">ORM(Eloquent)</a><br>
         <a href="{{ url('page_di') }}">依存注入</a><br>
         <a href="{{ url('page_cert') }}">認証</a><br>
         <a href="{{ url('page_test') }}">ユニットテスト</a><br>

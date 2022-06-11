@@ -10,29 +10,30 @@
 <body>
     <div class="request">
         <h2>ORM</h2>
-        Laravelには、データベースとの対話を楽しくするオブジェクトリレーショナルマッパー(ORM)であるEloquentが含まれています。Eloquentを使用する場合、各データベーステーブルには対応する「モデル」があり、そのテーブルとの対話に使用します。Eloquentモデルでは、データベーステーブルからレコードを取得するだけでなく、テーブルへのレコード挿入、更新、削除も可能です。
+        Laravelには、データベースとの対話を楽しくするオブジェクトリレーショナルマッパー(ORM)であるEloquentが含まれています。<br>
+        Eloquentを使用する場合、各データベーステーブルには対応する「モデル」があり、そのテーブルとの対話に使用します。<br>
+        Eloquentモデルでは、データベーステーブルからレコードを取得するだけでなく、テーブルへのレコード挿入、更新、削除も可能です。<br><br>
+
+        モデル、DB作成<br>
+        php artisan make:model models/orm -m<br>
+        php artisan make:seeder OrmTableSeeder<br><br>
 
 
         ここまで。<br>
-        下記サンプルフォームの送信ボタンを押すと、クエリビルダの見本用に作成した関数query_sampleが実行され、予め用意されたsqlテーブルの内容が表示されます。<br>
+        下記サンプルフォームの送信ボタンを押すと、ORMの見本用に作成した関数orm_sampleが実行され、予め用意されたsqlテーブルの内容が表示されます。<br>
         routes\web.phpに以下を記述します。
         <pre><code>
-        Route::post('query_sample', 'App\Http\Controllers\IroiroController@query_sample');
+        Route::post('orm_sample', 'App\Http\Controllers\IroiroController@orm_sample');
         </code></pre>
-        app\Http\ControllersにIroiroController.phpを用意し、その中にquery_sample関数を記述します。<br>
-        [TODO]DBに対するいろいろな操作を記述してみる
+        app\Http\ControllersにIroiroController.phpを用意し、その中にorm_sample関数を記述します。<br>
 
-        <pre><code>
-        public function query_sample(){
-            $sample = DB::table('sample')->get();
-            return view('query_sample',['sample'=>$sample]);
-        }
-        </code></pre>
+        (実際にコードを確認。テーブルへのレコード挿入、更新、削除を行う。)<br><br>
 
-        sqlテーブル"sample"の中身がquery_sample.blade.phpにpostされます。結果をご覧ください。<br><br>
+
+        sqlテーブル"orms"の中身がorm_sample.blade.phpにpostされます。結果をご覧ください。<br><br>
 
         <h2>サンプルフォーム</h2>
-        <form action="query_sample" method="post" accept-charset="utf-8">
+        <form action="orm_sample" method="post" accept-charset="utf-8">
           @csrf
           <input type="submit" value="送信" >
         </form>
