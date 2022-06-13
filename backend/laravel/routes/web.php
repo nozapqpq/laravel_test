@@ -35,6 +35,12 @@ Route::get('page_cert', 'App\Http\Controllers\PageAbstructController@cert');
 Route::get('page_test', 'App\Http\Controllers\PageAbstructController@test');
 Route::get('page_artisan', 'App\Http\Controllers\PageAbstructController@artisan');
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+require __DIR__.'/auth.php';
+
 /*
  * ***パッケージ、composer関連の情報***
  * 最初に下記をcomposerに取り込む必要がある。取り込むとcomposer.lockが更新される
