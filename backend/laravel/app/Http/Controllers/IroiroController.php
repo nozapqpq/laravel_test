@@ -17,7 +17,7 @@ class IroiroController extends Controller
 {
     // クエリビルダとORM
     public function query_sample(){
-        $sample = DB::table('sample')->get();
+        $sample = DB::table('sample')->where('sample1','abcde')->get();
         return view('query_sample',['sample'=>$sample]);
     }
 
@@ -29,12 +29,10 @@ class IroiroController extends Controller
         //$sample = orm::find(1);
 
         // テーブルに新しいレコードを挿入するsave()メソッド
-        /*
         $orm_cls = new orm();
         $orm_cls->sample1 = "abc";
         $orm_cls->sample2 = "abc1";
         $orm_cls->save();
-        */
         // データ更新もsave()メソッドを使用
         /*
         $target = orm::find(10);

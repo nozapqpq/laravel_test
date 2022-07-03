@@ -10,28 +10,39 @@
 <body>
     <div class="request">
         <h2>クエリビルダ</h2>
-        下記サンプルフォームの送信ボタンを押すと、クエリビルダの見本用に作成した関数query_sampleが実行され、予め用意されたsqlテーブルの内容が表示されます。<br>
+
+        説明用ファイル一覧<br>
+        <table border="#000000">
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>App/Http/Controllers/IroiroController.php</td>
+                <td>サンプルフォームの送信ボタン押下時に実行される関数query_sample<br>
+                    用意したsqlテーブルのうち、指定した条件と一致する内容が表示される</td>
+            </tr>
+            <tr>
+                <td>mysqlのsampleテーブル</td>
+                <td>サンプル用DB</td>
+            </tr>
+        </table>
+
+        <br>
         routes\web.phpに以下を記述します。
-        <pre><code>
+        <pre style="font-size:16px;"><code>
         Route::post('query_sample', 'App\Http\Controllers\IroiroController@query_sample');
         </code></pre>
-        app\Http\ControllersにIroiroController.phpを用意し、その中にquery_sample関数を記述します。<br>
-        [TODO]DBに対するいろいろな操作を記述してみる
-
-        <pre><code>
-        public function query_sample(){
-            $sample = DB::table('sample')->get();
-            return view('query_sample',['sample'=>$sample]);
-        }
-        </code></pre>
-
-        sqlテーブル"sample"の中身がquery_sample.blade.phpにpostされます。結果をご覧ください。<br><br>
-
+    
         <h2>サンプルフォーム</h2>
+        sqlテーブル"sample"の中身がquery_sample.blade.phpにpostされます。<br><br>
         <form action="query_sample" method="post" accept-charset="utf-8">
           @csrf
           <input type="submit" value="送信" >
         </form>
+
+        <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
     </div>
 
 

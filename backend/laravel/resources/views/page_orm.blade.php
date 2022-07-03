@@ -14,29 +14,54 @@
         Eloquentを使用する場合、各データベーステーブルには対応する「モデル」があり、そのテーブルとの対話に使用します。<br>
         Eloquentモデルでは、データベーステーブルからレコードを取得するだけでなく、テーブルへのレコード挿入、更新、削除も可能です。<br><br>
 
-        モデル、DB作成<br>
-        php artisan make:model models/orm -m<br>
-        php artisan make:seeder OrmTableSeeder<br><br>
+        説明用ファイル一覧<br>
+        <table border="#000000">
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>App/Http/Controllers/IroiroController.php</td>
+                <td>サンプルフォームの送信ボタン押下時に実行される関数orm_sample<br>
+                    テーブルへのレコード挿入を行い、テーブル内容を表示
+            </tr>
+            <tr>
+                <td>App/Http/Models/models/orm.php</td>
+                <td>DBのモデル</td>
+            </tr>
+            <tr>
+                <td>database/seeders/OrmTableSeeder.php</td>
+                <td>DBのseeder</td>
+            </tr>
+            <tr>
+                <td>database/migration/2022_06_08_140130_create_orms_table.php</td>
+                <td>DBのmigration</td>
+            </tr>
+            <tr>
+                <td>mysqlのormsテーブル</td>
+                <td>サンプル用DB</td>
+            </tr>
+        </table>
 
-
-        ここまで。<br>
-        下記サンプルフォームの送信ボタンを押すと、ORMの見本用に作成した関数orm_sampleが実行され、予め用意されたsqlテーブルの内容が表示されます。<br>
+        <br>
         routes\web.phpに以下を記述します。
-        <pre><code>
+        <pre style="font-size:16px;"><code>
         Route::post('orm_sample', 'App\Http\Controllers\IroiroController@orm_sample');
         </code></pre>
-        app\Http\ControllersにIroiroController.phpを用意し、その中にorm_sample関数を記述します。<br>
-
-        (実際にコードを確認。テーブルへのレコード挿入、更新、削除を行う。)<br><br>
 
 
-        sqlテーブル"orms"の中身がorm_sample.blade.phpにpostされます。結果をご覧ください。<br><br>
+        
 
         <h2>サンプルフォーム</h2>
+        orm_sample()でsqlテーブル"orms"と結びつけられたオブジェクトの処理を行い、<br>
+        処理結果のテーブルの中身をorm_sample.blade.phpにpostします。<br><br>
         <form action="orm_sample" method="post" accept-charset="utf-8">
           @csrf
           <input type="submit" value="送信" >
         </form>
+
+        <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
     </div>
 
 

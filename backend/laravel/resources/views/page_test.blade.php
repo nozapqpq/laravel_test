@@ -10,8 +10,34 @@
 <body>
     <div class="request">
         <h2>テスト</h2>
-        テストの作成、実行
-        <pre><code>
+        テストの作成、実行<br>
+        対象ファイル等<br>
+        <table>
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>tests/Unit/ExampleTest.php</td>
+                <td>テスト本体</td>
+            </tr>
+            <tr>
+                <td>app/Http/Controllers/HomeController.php</td>
+                <td>テスト対象の関数</td>
+            </tr>
+            <tr>
+                <td>
+                    app/Models/Phone.php<br>
+                    database/factories/PhoneFactory.php<br>
+                    database/seeders/FakerPhoneSeeder.php<br>
+                    (mysqlのphonesテーブル)
+                </td>
+                <td>テスト用DB準備</td>
+            </tr>
+
+        </table>
+
+        <pre style="font-size:16px;"><code>
         // tests/Featureディレクトリに配置したい場合
         $ php artisan make:test HogeTest
         // tests/Unitディレクトリ内に配置したい場合
@@ -33,15 +59,9 @@
         php artisan test tests/Unit/ExampleTest.php
         </code></pre>
 
-        
-
-
         <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
 
-        <br><br>
-
-
-
-
+    </div>
 </body>
 </html>

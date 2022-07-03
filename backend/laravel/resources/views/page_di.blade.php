@@ -24,20 +24,44 @@
 
         <br><br>
 
+        <table border="#000000">
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>App/Http/Controllers/IroiroController.php</td>
+                <td>コンストラクタインジェクションの例di_sample<br>
+            </tr>
+            <tr>
+                <td>App/Components/Calculation.php</td>
+                <td>コンストラクタインジェクションされる関数</td>
+            </tr>
+            <tr>
+                <td>App/Providers/CalculationServiceProvider.php<br>
+                    config/app.php</td>
+                <td>コンストラクタインジェクションされる関数のサービスプロバイダ<br>
+                    サービスプロバイダはapp.phpに登録が必要</td>
+            </tr>
+        </table>
 
-        下記サンプルフォームの送信ボタンを押すと、ORMの見本用に作成した関数orm_sampleが実行され、予め用意されたsqlテーブルの内容が表示されます。<br>
+        <br><br>
+
         routes\web.phpに以下を記述します。
-        <pre><code>
+        <pre style="font-size:16px;"><code>
         Route::post('orm_sample', 'App\Http\Controllers\IroiroController@orm_sample');
         </code></pre>
-        app\Http\ControllersにIroiroController.phpを用意し、その中にorm_sample関数を記述します。<br>
 
 
         <h2>サンプルフォーム</h2>
+        コンストラクタインジェクションされたクラスの処理を実行<br>
         <form action="di_sample" method="post" accept-charset="utf-8">
           @csrf
           <input type="submit" value="送信" >
         </form>
+
+        <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
     </div>
 
 

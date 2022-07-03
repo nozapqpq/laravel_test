@@ -49,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/page_abstruct');
+        return redirect('/page_cert');
     }
 }

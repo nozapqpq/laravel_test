@@ -10,23 +10,29 @@
 <body>
     <div class="request">
         <h2>リクエスト処理</h2>
+
         フォームの内容を送信し、別のページで受けます。<br>
         まずフォームのactionとLaravelのコントローラを結びつけます。routes\web.phpに以下を記述します。
-        <pre><code>
+        <pre style="font-size:16px;"><code>
         Route::post('request_post', 'App\Http\Controllers\RequestSampleController@request_post');
         </code></pre>
-        app\Http\ControllersにRequestSampleController.phpを用意し、その中にrequest_post関数を記述します。
 
-        <pre><code>
-        public function request_post(Request $request) {
-            $attributes = $request->only(['eval','comment']);
-            return view('request_result',compact('attributes'));
-        }
-        </code></pre>
+        説明用ファイル一覧<br>
+        <table border="#000000">
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>App/Http/Controllers/RequestSampleController.php</td>
+                <td>フォームで指定した"request_post"の処理</td>
+            </tr>
+        </table>
 
-        フォーム内容のeval,commentがrequest_result.blade.phpにpostされます。結果をご覧ください。<br><br>
+        <br><br>
 
         <h2>サンプルフォーム</h2>
+        フォーム内容のeval,commentがrequest_result.blade.phpにpostされます。<br><br>
         <form action="request_post" method="post" accept-charset="utf-8">
           @csrf
           eval：
@@ -42,6 +48,9 @@
           <input type="text" name="comment" value="">
           <input type="submit" value="送信" >
         </form>
+
+        <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
     </div>
 
 

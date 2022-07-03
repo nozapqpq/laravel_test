@@ -22,28 +22,43 @@
 
         ここではLaravel Breezeを使った例を説明<br><br>
         Laravel Breezeパッケージのインストール<br>
-        <pre><code>
+        <pre style="font-size:16px;"><code>
         $ composer require laravel/breeze
         $ php artisan breeze:install
         $ npm install && npm run dev
         $ php artisan migrate
         </code></pre>
 
-
-
-        <br><br>
-
         できあがったもの<br>
         Laravel Breezeパッケージをインストールするだけで、何もしなくても一通りのことが行えるようになります。<br>
         <a href="/register">ユーザー登録</a><br>
         <a href="/login">ログイン</a><br>
         
+        <br>
+
+        説明用ファイル一覧<br>
+        <table border="#000000">
+            <tr>
+                <th>ファイル名等</th
+                ><th>内容</th>
+            </tr>
+            <tr>
+                <td>resources/views/dashboard.blade.php</td>
+                <td>ログインページ、認証パッケージのインストール時に生成される</td>
+            </tr>
+            <tr>
+                <td>App/Http/Controllers/Auth/AuthenticatedSessionController.php</td>
+                <td>ログアウト時の処理</td>
+            </tr>
+        </table>
+
         <br><br>
 
-        ↓↓ログイン状態↓↓<br><br>
+        ↓↓ログイン状態がAuth::check()で取得できることを確認↓↓<br><br>
         {{ $login_status_msg }}<br>
 
         <br><br>
+        <a href={{ url('/page_abstruct') }}>ホームへ戻る</a>
 
 
 
