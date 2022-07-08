@@ -31,11 +31,13 @@
             </tr>
             <tr>
                 <td>database/seeders/OrmTableSeeder.php</td>
-                <td>DBのseeder</td>
+                <td>DBのseeder<br>
+                    ormテーブルへのデータの追加</td>
             </tr>
             <tr>
                 <td>database/migration/2022_06_08_140130_create_orms_table.php</td>
-                <td>DBのmigration</td>
+                <td>DBのmigration<br>
+                    ormテーブルの作成</td>
             </tr>
             <tr>
                 <td>mysqlのormsテーブル</td>

@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('greeting', function() {
+    return 'Hello World';
+});
 Route::get('netkeiba','App\Http\Controllers\ScrapingController@netkeiba');
 Route::get('google_search','App\Http\Controllers\ScrapingController@google_search');
 Route::post('kaisai', 'App\Http\Controllers\KaisaiImportController@index');

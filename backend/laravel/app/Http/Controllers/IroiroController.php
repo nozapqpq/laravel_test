@@ -29,17 +29,18 @@ class IroiroController extends Controller
         //$sample = orm::find(1);
 
         // テーブルに新しいレコードを挿入するsave()メソッド
+        /*
         $orm_cls = new orm();
         $orm_cls->sample1 = "abc";
         $orm_cls->sample2 = "abc1";
         $orm_cls->save();
+        */
         // データ更新もsave()メソッドを使用
-        /*
-        $target = orm::find(10);
+        // find(n)でid==nの行を見つけて更新
+        $target = orm::find(1);
         $target->sample1 = "cde";
         $target->sample2 = "cde1";
         $target->save();
-        */
         // レコードの削除をするdelete()メソッド
         /*
         orm::where('sample1','cde')->delete();

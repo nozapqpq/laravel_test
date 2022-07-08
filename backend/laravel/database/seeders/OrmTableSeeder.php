@@ -15,7 +15,7 @@ class OrmTableSeeder extends Seeder
      */
     public function run()
     {
-        // DatabaseSeederにシーディング対象として追加する
+        // php artisan db:seed --class=OrmTableSeederでormテーブルにデータ追加
         DB::table('orms')->insert([
             ['sample1' => 'aa', 'sample2' => 'a1'],
             ['sample1' => 'bb', 'sample2' => 'b1'],
