@@ -12,6 +12,7 @@
 /config/*.php
 !/config/app.php
 /database/migrations
+/database/factories/UserFactory.php
 /lang
 /public
 /resources/css
