@@ -37,6 +37,14 @@
 * composer create-project laravel/laravel
 * php artisan --versionでv9.0以上で生成されていることを確認する
 
+* 初回メモ
+    - docker desktop for windowsを使用する前提です
+    - まずdocker-compose build
+    - laravelフォルダを一度削除、composer create-project laravel/laravelでlaravelをインストール、削除したファイル類をgit checkoutで元に戻す(.gitignoreを優先で戻す)
+    - dockerから最初のページを開こうとした際、storage/logsおよびframeworkのファイルのパーミッションでエラーになることがあります
+    - DBがうまくいかないときは.envを確認してください
+        - DB_HOST=db, DB_DATABASEやUSERNAME等はdocker_filesにあるmysqlのDockerfileを参照ください
+
 ## kaisai.csvについて
 
 * レース検索の☆6
