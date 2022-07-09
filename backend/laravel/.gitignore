@@ -11,7 +11,7 @@
 /bootstrap
 /config/*.php
 !/config/app.php
-/database
+/database/migrations
 /lang
 /public
 /resources/css
@@ -21,7 +21,8 @@
 /routes/console.php
 /storage
 /storage/*.key
-/tests
+/tests/Feature
+/tests/*.php
 /vendor
 .env
 .env.backup
