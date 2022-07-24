@@ -25,6 +25,8 @@
 /tests/Feature
 /tests/*.php
 /vendor
+/download
+
 .env
 .env.backup
 .phpunit.result.cache
