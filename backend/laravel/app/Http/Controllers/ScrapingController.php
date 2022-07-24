@@ -43,6 +43,14 @@ class ScrapingController extends Controller
                 $trainer[$ix] = $node->text();
                 $ix++;
             });
+            $crawler->filter('td.Weight')->each(function($node) use (&$ix, &$weight) {
+                $weight[$ix] = $node->text();
+                $ix++;
+            });
+            $crawler->filter('td.Popular')->each(function($node) use (&$ix, &$pop) {
+                $pop[$ix] = $node->text();
+                $ix++;
+            });
         }
         foreach ($horsename as $t => $w) {
             print $w. "<br>";
@@ -54,6 +62,12 @@ class ScrapingController extends Controller
             print $w. "<br>";
         }
         foreach ($trainer as $t => $w) {
+            print $w. "<br>";
+        }
+        foreach ($weight as $t => $w) {
+            print $w. "<br>";
+        }
+        foreach ($pop as $t => $w) {
             print $w. "<br>";
         }
     }

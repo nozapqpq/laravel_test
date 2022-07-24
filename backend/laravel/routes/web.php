@@ -22,6 +22,8 @@ Route::get('greeting', function() {
 Route::get('netkeiba','App\Http\Controllers\ScrapingController@netkeiba');
 Route::get('google_search','App\Http\Controllers\ScrapingController@google_search');
 Route::post('kaisai', 'App\Http\Controllers\KaisaiImportController@index');
+Route::get('yuma_analysis', 'App\Http\Controllers\YumaAnalysisController@index');
+Route::post('yuma_analysis/extract', 'App\Http\Controllers\YumaAnalysisController@extract');
 Route::get('home', 'App\Http\Controllers\HomeController@index');
 
 Route::get('page_abstruct', 'App\Http\Controllers\PageAbstructController@index');
