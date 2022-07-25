@@ -64,7 +64,7 @@ class OddsTable:
         # 開催回と開催日数の取得は時間がかかるので、jsonに既に保存された日付にものであればそれを使う
         kaisai_json_open = open(kaisai_json_fn,'r')
         kaisai_json = json.load(kaisai_json_open)
-        if kaisai_json["year"] == year and kaisai_json["month"] == mm and kaisai_json["date"] == dd and kaisai_json["kaisai_times"] != -1 and kaisai_json["kaisai_day"] != -1:
+        if kaisai_json["year"] == year and kaisai_json["month"] == mm and kaisai_json["date"] == dd and kaisai_json["place"] ==place and kaisai_json["kaisai_times"] != -1 and kaisai_json["kaisai_day"] != -1:
             kaisai_times = kaisai_json["kaisai_times"]
             kaisai_day = kaisai_json["kaisai_day"]
             url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(kaisai_times), self.numStr(kaisai_day), self.numStr(race))
@@ -97,7 +97,7 @@ class OddsTable:
                             #print(str(multi_continue)+"days skip")
                     else:
                         print("該当レースのURL発見：", url)
-                        kaisai_list = {"year":year,"month":mm,"date":dd,"kaisai_times":i,"kaisai_day":j}
+                        kaisai_list = {"year":year,"month":mm,"date":dd,"place":place,"kaisai_times":i,"kaisai_day":j}
                         with open(kaisai_json_fn,'w') as f:
                             json.dump(kaisai_list, f, ensure_ascii=False)
                         return url
