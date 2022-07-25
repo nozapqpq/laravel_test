@@ -67,7 +67,7 @@ class OddsTable:
         if kaisai_json["year"] == year and kaisai_json["month"] == mm and kaisai_json["date"] == dd and kaisai_json["kaisai_times"] != -1 and kaisai_json["kaisai_day"] != -1:
             kaisai_times = kaisai_json["kaisai_times"]
             kaisai_day = kaisai_json["kaisai_day"]
-            url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(i), self.numStr(j), self.numStr(race))
+            url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(kaisai_times), self.numStr(kaisai_day), self.numStr(race))
             return url
         else:
             for i in range(1,9): # 開催回
