@@ -289,8 +289,10 @@ class YumaAnalysisController extends Controller
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                         } elseif ($actual_odds < 10) {
                             $cost = 0;
-                            $memo = "x";
-                            $memo2 = "高勝率の低期待値馬";
+                            if ($actual_odds > 0) {
+                                $memo = "x";
+                                $memo2 = "高勝率の低期待値馬";
+                            }
                         } elseif ($exp*100 / $actual_odds <= 3) {
                             // 以下オッズ10倍以上の不人気馬且つ期待値0.8未満
                             // 300円で賄える範囲なら保険を掛ける
