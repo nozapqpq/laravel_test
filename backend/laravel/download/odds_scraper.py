@@ -59,36 +59,49 @@ class OddsTable:
 
     # 入力した日付のページのurlを返す
     def get_target_date_url(self, year, mm, dd, place, race):
-        for i in range(1,9): # 開催回
-            multi_continue = 0
-            for j in range(1,13): # 開催日数
-                if multi_continue > 0:
-                    multi_continue = multi_continue - 1
-                    continue
-                Base = "https://race.sp.netkeiba.com/?pid=odds_view&type=b1&race_id="
-                url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(i), self.numStr(j), self.numStr(race))
-                self.driver.get(url)
+        Base = "https://race.sp.netkeiba.com/?pid=odds_view&type=b1&race_id="
+        kaisai_json_fn = '/var/www/laravel/download/kaisai.json'
+        # 開催回と開催日数の取得は時間がかかるので、jsonに既に保存された日付にものであればそれを使う
+        kaisai_json_open = open(kaisai_json_fn,'r')
+        kaisai_json = json.load(kaisai_json_open)
+        if kaisai_json["year"] == year and kaisai_json["month"] == mm and kaisai_json["date"] == dd and kaisai_json["kaisai_times"] != -1 and kaisai_json["kaisai_day"] != -1:
+            kaisai_times = kaisai_json["kaisai_times"]
+            kaisai_day = kaisai_json["kaisai_day"]
+            url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(i), self.numStr(j), self.numStr(race))
+            return url
+        else:
+            for i in range(1,9): # 開催回
+                multi_continue = 0
+                for j in range(1,13): # 開催日数
+                    if multi_continue > 0:
+                        multi_continue = multi_continue - 1
+                        continue
+                    url = "%s%s%s%s%s%s&housiki=c0&rf=shutuba_submenu" % (Base, str(year), self.numStr(place), self.numStr(i), self.numStr(j), self.numStr(race))
+                    self.driver.get(url)
 
-                racedetail_elements = self.driver.find_element(By.CLASS_NAME,'Race_Detail_Info_Btn')
-                CommonDate = racedetail_elements.find_element(By.CLASS_NAME,'Change_Btn').text if "Day" in racedetail_elements.find_element(By.CLASS_NAME,'Change_Btn').get_attribute('class') else ""
-                splitted = re.split(r"/|\(", CommonDate)
-                CommonMM = int(splitted[0])
-                CommonDD = int(splitted[1])
-                print(mm, dd, CommonDate, i, "開催", j, "日目")
-                if CommonMM < mm-1:
-                    break
-                # 何度も回すと相当な時間がかかるため検索回数を減らす工夫
-                if CommonMM != mm or CommonDD != dd:
-                    date_diff = dd-CommonDD
-                    if CommonMM != mm:
-                        date_diff = date_diff + 31
-                    if date_diff > 7:
-                        multi_continue = (int(date_diff/7)-1)*2
-                        #print(str(multi_continue)+"days skip")
-                else:
-                    print("該当レースのURL発見：", url)
-                    return url
-                time.sleep(1)
+                    racedetail_elements = self.driver.find_element(By.CLASS_NAME,'Race_Detail_Info_Btn')
+                    CommonDate = racedetail_elements.find_element(By.CLASS_NAME,'Change_Btn').text if "Day" in racedetail_elements.find_element(By.CLASS_NAME,'Change_Btn').get_attribute('class') else ""
+                    splitted = re.split(r"/|\(", CommonDate)
+                    CommonMM = int(splitted[0])
+                    CommonDD = int(splitted[1])
+                    print(mm, dd, CommonDate, i, "開催", j, "日目")
+                    if CommonMM < mm-1:
+                        break
+                    # 何度も回すと相当な時間がかかるため検索回数を減らす工夫
+                    if CommonMM != mm or CommonDD != dd:
+                        date_diff = dd-CommonDD
+                        if CommonMM != mm:
+                            date_diff = date_diff + 31
+                        if date_diff > 7:
+                            multi_continue = (int(date_diff/7)-1)*2
+                            #print(str(multi_continue)+"days skip")
+                    else:
+                        print("該当レースのURL発見：", url)
+                        kaisai_list = {"year":year,"month":mm,"date":dd,"kaisai_times":i,"kaisai_day":j}
+                        with open(kaisai_json_fn,'w') as f:
+                            json.dump(kaisai_list, f, ensure_ascii=False)
+                        return url
+                    time.sleep(1)
         return none
 
 # メイン処理、入力レースのオッズデータをjsonファイルに書き出す
