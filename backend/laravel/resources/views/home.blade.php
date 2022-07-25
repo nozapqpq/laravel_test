@@ -26,10 +26,34 @@
         <option value="hanshin">阪神</option>
         <option value="kokura">小倉</option>
       </select>
-      <input name="race" type="text" maxlength=3 size=3 />R<br>
+      <input name="race" type="text" maxlength=2 size=2 />R<br>
       <button>期待値計算</button>
     </form>
-    <br>
+    <br><br>
+
+    <form action="yuma_analysis/extract_local" method="post">
+      @csrf
+      <input name="date" type="date" />
+      <select name="place">
+        <option value="monbetsu">門別</option>
+        <option value="morioka">盛岡</option>
+        <option value="mizusawa">水沢</option>
+        <option value="urawa">浦和</option>
+        <option value="funabashi">船橋</option>
+        <option value="oi">大井</option>
+        <option value="kawasaki">川崎</option>
+        <option value="kanazawa">金沢</option>
+        <option value="kasamatsu">笠松</option>
+        <option value="nagoya">名古屋</option>
+        <option value="sonoda">園田</option>
+        <option value="himeji">姫路</option>
+        <option value="kochi">高知</option>
+        <option value="saga">佐賀</option>
+        <option value="obihiro">帯広</option>
+      </select>
+      <input name="race" type="text" maxlength=2 size=2 />R<br>
+      <button>期待値計算(地方)</button>
+    </form><br>
     ゆまちゃん競馬からの画像取り込み(laravel/downloadフォルダを作成する必要あり。chmod 777として)<br><br>
 
     画像解析(Google APIを使う)<br>

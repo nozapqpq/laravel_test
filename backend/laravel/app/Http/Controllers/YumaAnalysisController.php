@@ -10,6 +10,7 @@ class YumaAnalysisController extends Controller
 {
     //
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
+    const ODDS_DAMPING_RATIO = 0.8;
     public function index() {
         return view('home');
     }
@@ -104,9 +105,81 @@ class YumaAnalysisController extends Controller
         print_r($scrape_obj["odds_info"]);
 
     }
+    public function extract_local(Request $request) {
+        $attributes = $request->only(['place','race','date']);
+        preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
+
+        $year = intval($ymd[1][0]);
+        $month = intval($ymd[2][0]);
+        $date = intval($ymd[3][0]);
+        $race = intval($attributes["race"]);
+        $place = $attributes["place"];
+        $time = 2040;
+        echo $year.$month.$date.$race.$place;
+        if ($place == "kanazawa") {
+            switch ($race) {
+                case 10:$time=1710;break;
+                case 11:$time=1745;break;
+                case 12:$time=1825;break;
+                default:$time=950;
+            }
+        } elseif ($place == "oi") {
+            switch ($race) {
+                case 10:$time=1930;break;
+                case 11:$time=2010;break;
+                case 12:$time=2050;break;
+                default:$time=950;
+            }
+        } elseif ($place == "sonoda") {
+            switch ($race) {
+                case 10:$time=1915;break;
+                case 11:$time=1955;break;
+                case 12:$time=2030;break;
+                default:$time=950;
+            }
+        } elseif ($place == "obihiro") {
+            switch ($race) {
+                case 10:$time=1940;break;
+                case 11:$time=2015;break;
+                case 12:$time=2045;break;
+                default:$time=950;
+            }
+        }
+        // 発走6分前ごろから情報が出る
+        if ($time % 100 <= 5) {
+            $time -= 47;
+        } else {
+            $time -= 7;
+        }
+        echo $year."/".$month."/".$date."(".$race."R)".$place.$time."<br>";
+        
+        $scrape_input = array('place'=>$place,'year'=>$year,'month'=>$month,'date'=>$date,'race'=>$race);
+
+        // データ処理本体
+        // ゆまちゃん画像取得、白塗り
+        $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
+        // 画像解析
+        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.jpg');
+        // オッズ取得
+        $scrape_obj = $this->exec_odds_scraper_local($scrape_input);
+
+        // 出力、データ解析
+        $umabans = $image_analysed[1];
+        $win_rates = $image_analysed[2];
+
+        $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates);
+
+        echo "<br><br>";
+        print_r($umabans);
+        echo "<br>";
+        print_r($win_rates);
+        echo "<br>";
+        print_r($scrape_obj["odds_info"]);
+
+    }
     // ゆまちゃん競馬から画像を取り込む(python実行)
     private function exec_yuma_shironuri($year, $month, $date, $time, $filename) {
-        for ($i=0;$i<300;$i++) { // 3分間で画像が出力されている前提
+        for ($i=0;$i<400;$i++) { // 3分間で画像が出力されている前提
             if ($i % 100 >= 60) {
                 continue;
             }
@@ -160,6 +233,19 @@ class YumaAnalysisController extends Controller
 
         return $scrape_obj;
     }
+    private function exec_odds_scraper_local($scrape_input){
+        $json = json_encode($scrape_input);
+        file_put_contents(self::DOWNLOAD_PATH."scrape_input.json", $json);
+        $command2="python3 ".self::DOWNLOAD_PATH."odds_scraper_local.py ";
+        
+        exec($command2,$output2);
+
+        sleep(1);
+        $scrape_output = file_get_contents(self::DOWNLOAD_PATH."scrape_output.json");
+        $scrape_obj = json_decode($scrape_output,true);
+
+        return $scrape_obj;
+    }
     private function print_yuma_odds($odds_info, $umabans, $win_rates){
         $max_i = count($odds_info);
         $max_j = count($umabans);
@@ -178,7 +264,7 @@ class YumaAnalysisController extends Controller
             echo "<tr>";
             if (count($odds_info) > $i) {
                 // オッズは最後の5分でガクッと下がるので低めに見積もる
-                $actual_odds = round(floatval($odds_info[$i]["odds"])*0.8, 1);
+                $actual_odds = round(floatval($odds_info[$i]["odds"])*self::ODDS_DAMPING_RATIO, 1);
                 echo "<td align=right>".$odds_info[$i]["umaban"]."</td>";
                 echo "<td align=center>".$odds_info[$i]["horsename"]."</td>";
                 echo "<td align=right>".$actual_odds."</td>";
@@ -188,40 +274,30 @@ class YumaAnalysisController extends Controller
                         $memo = "";
                         $memo2 = "";
                         $cost = intval($exp*100 / $actual_odds)*100+100;
-                        if (floatval($win_rates[$j]) >= 6.0) {
-                            if ($exp >= 1.5) {
-                                $memo = "☆☆☆";
-                                $criteria += floatval($win_rates[$j]);
-                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                            } elseif ($exp >= 1.0) {
-                                $memo = "☆☆";
-                                $criteria += floatval($win_rates[$j]);
-                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                            } elseif ($exp >= 0.8) {
-                                $memo = "☆";
-                                $memo2 = "保険として購入する";
-                                $criteria_hoken += floatval($win_rates[$j]);
-                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                            } else {
-                                $cost = 0;
-                                $memo = "x";
-                                $memo2 = "高勝率の低期待値馬";
-                            }
-                        } elseif ($actual_odds >= 10 && $exp >= 0.4) {
-                            if ($exp >= 1.0) {
-                                $criteria += floatval($win_rates[$j]);
-                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                                $memo = "☆☆";
-                                $memo2 = "(不人気)";
-                            } elseif ($exp*100 / $actual_odds <= 3.5) {
-                                // 300円で賄える範囲なら保険を掛ける
-                                $criteria_hoken += floatval($win_rates[$j]);
-                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                                $memo = "☆";
-                                $memo2 = "保険として購入する(不人気)";
-                            } else {
-                                $cost = 0;
-                            }
+                        if ($exp >= 1.5) {
+                            $memo = "☆☆☆";
+                            $criteria += floatval($win_rates[$j]);
+                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
+                        } elseif ($exp >= 1.0) {
+                            $memo = "☆☆";
+                            $criteria += floatval($win_rates[$j]);
+                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
+                        } elseif ($exp >= 0.8) {
+                            $memo = "☆";
+                            $memo2 = "保険として購入する";
+                            $criteria_hoken += floatval($win_rates[$j]);
+                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
+                        } elseif ($actual_odds < 10) {
+                            $cost = 0;
+                            $memo = "x";
+                            $memo2 = "高勝率の低期待値馬";
+                        } elseif ($exp*100 / $actual_odds <= 3) {
+                            // 以下オッズ10倍以上の不人気馬且つ期待値0.8未満
+                            // 300円で賄える範囲なら保険を掛ける
+                            $criteria_hoken += floatval($win_rates[$j]);
+                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
+                            $memo = "☆";
+                            $memo2 = "保険として購入する(不人気)";
                         } else {
                             $cost = 0;
                         }
