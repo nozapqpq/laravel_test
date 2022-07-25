@@ -166,6 +166,8 @@ class YumaAnalysisController extends Controller
         $criteria = 0;
         $criteria_hoken = 0;
         $cost = 0;
+        $total_cost = 0;
+        $exp_dividend = 0;
 
         echo "<table border=1>";
         echo "<tr>";
@@ -175,39 +177,46 @@ class YumaAnalysisController extends Controller
         for ($i=0;$i<$max_i;$i++) {
             echo "<tr>";
             if (count($odds_info) > $i) {
-                echo "<td>".$odds_info[$i]["umaban"]."</td>";
-                echo "<td>".$odds_info[$i]["horsename"]."</td>";
-                echo "<td>".$odds_info[$i]["odds"]."</td>";
+                // オッズは最後の5分でガクッと下がるので低めに見積もる
+                $actual_odds = round(floatval($odds_info[$i]["odds"])*0.8, 1);
+                echo "<td align=right>".$odds_info[$i]["umaban"]."</td>";
+                echo "<td align=center>".$odds_info[$i]["horsename"]."</td>";
+                echo "<td align=right>".$actual_odds."</td>";
                 for ($j=0;$j<$max_j;$j++) {
                     if ($umabans[$j] == $odds_info[$i]["umaban"]) {
-                        $exp = floatval($odds_info[$i]["odds"])*floatval($win_rates[$j])/100;
+                        $exp = $actual_odds*floatval($win_rates[$j])/100;
                         $memo = "";
                         $memo2 = "";
-                        $cost = intval($exp*100 / floatval($odds_info[$i]["odds"]))*100+100;
-                        if (floatval($win_rates[$j]) >= 7.0) {
+                        $cost = intval($exp*100 / $actual_odds)*100+100;
+                        if (floatval($win_rates[$j]) >= 6.0) {
                             if ($exp >= 1.5) {
                                 $memo = "☆☆☆";
                                 $criteria += floatval($win_rates[$j]);
+                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                             } elseif ($exp >= 1.0) {
                                 $memo = "☆☆";
                                 $criteria += floatval($win_rates[$j]);
+                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                             } elseif ($exp >= 0.8) {
                                 $memo = "☆";
                                 $memo2 = "保険として購入する";
                                 $criteria_hoken += floatval($win_rates[$j]);
+                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                             } else {
                                 $cost = 0;
                                 $memo = "x";
                                 $memo2 = "高勝率の低期待値馬";
                             }
-                        } elseif (floatval($odds_info[$i]["odds"]) >= 15 && $exp >= 0.4) {
+                        } elseif ($actual_odds >= 10 && $exp >= 0.4) {
                             if ($exp >= 1.0) {
                                 $criteria += floatval($win_rates[$j]);
+                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                                 $memo = "☆☆";
                                 $memo2 = "(不人気)";
-                            } elseif ($exp*100 / floatval($odds_info[$i]["odds"]) <= 3.5) {
+                            } elseif ($exp*100 / $actual_odds <= 3.5) {
                                 // 300円で賄える範囲なら保険を掛ける
                                 $criteria_hoken += floatval($win_rates[$j]);
+                                $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                                 $memo = "☆";
                                 $memo2 = "保険として購入する(不人気)";
                             } else {
@@ -216,10 +225,11 @@ class YumaAnalysisController extends Controller
                         } else {
                             $cost = 0;
                         }
-                        echo "<td>".$win_rates[$j]."</td>";
-                        echo "<td>".sprintf("%.2f", $exp)."</td>";
-                        echo "<td>".$memo."</td>";
-                        echo "<td>".$cost."</td>";
+                        $total_cost += $cost;
+                        echo "<td align=right>".$win_rates[$j]."</td>";
+                        echo "<td align=right>".sprintf("%.2f", $exp)."</td>";
+                        echo "<td align=center>".$memo."</td>";
+                        echo "<td align=right>".$cost."</td>";
                         echo "<td>".$memo2."</td>";
                         break;
                     }
@@ -228,11 +238,10 @@ class YumaAnalysisController extends Controller
             echo "</tr>";
         }
         echo "</table><br>";
-        echo "購入基準：勝率3割以上、保険発動率と合わせて7割ほど欲しい<br>";
+        echo "購入基準：勝率+保険発動率=7割以上、期待値8000は超えてほしい<br>";
         echo "勝率：".sprintf("%.1f",$criteria)."％<br>";
-        echo "保険発動率：".sprintf("%.1f",$criteria_hoken)."％<br>";
-        echo "配当が期待値*10000に近くなるように買う<br>";
-        echo "オッズ15倍以上は低コストで配当の条件を満たすので酷くなければ買う<br><br>";
-        echo "三連単で合成オッズ出さないと急激に変わるので使い物にならないのでは<br>";
+        echo "保険発動率：".sprintf("%.1f",$criteria_hoken)."％<br><br>";
+        echo "コスト：".$total_cost."<br>";
+        echo "期待値：".round($exp_dividend,0)."<br>";
     }
 }
