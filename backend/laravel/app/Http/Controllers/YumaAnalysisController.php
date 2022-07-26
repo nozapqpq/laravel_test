@@ -24,7 +24,7 @@ class YumaAnalysisController extends Controller
         $race = intval($attributes["race"]);
         $place = $attributes["place"];
         $time = intval($attributes["hour"])*100+intval($attributes["minute"]);
-        $odds_daming_ratio = floatval($attributes["odds_damping_ratio"]);
+        $odds_damping_ratio = floatval($attributes["odds_damping_ratio"]);
         // 発走6分前ごろから情報が出る
         if ($time % 100 <= 5) {
             $time -= 46; // 1000の6分前は994でなく954
