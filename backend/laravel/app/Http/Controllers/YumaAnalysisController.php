@@ -8,14 +8,16 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 
 class YumaAnalysisController extends Controller
 {
-    //
+    // 期待値1の配当を何円とするか
+    const DIVIDEND_CRITERIA = 10000;
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
-    const ODDS_DAMPING_RATIO = 0.8;
+    //const ODDS_DAMPING_RATIO = 0.75;
+    const ODDS_DAMPING_RATIO = 1.0; // 確定オッズでのチェック用
     public function index() {
         return view('home');
     }
     public function extract(Request $request) {
-        $attributes = $request->only(['place','race','date']);
+        $attributes = $request->only(['place','race','date','hour','minute']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
         $year = intval($ymd[1][0]);
@@ -23,56 +25,7 @@ class YumaAnalysisController extends Controller
         $date = intval($ymd[3][0]);
         $race = intval($attributes["race"]);
         $place = $attributes["place"];
-        $time = 950;
-        if ($place == "fukushima") {
-            switch ($race) {
-                case 1:$time=1010;break;
-                case 2:$time=1045;break;
-                case 3:$time=1115;break;
-                case 4:$time=1145;break;
-                case 5:$time=1235;break;
-                case 6:$time=1306;break;
-                case 7:$time=1335;break;
-                case 8:$time=1405;break;
-                case 9:$time=1435;break;
-                case 10:$time=1510;break;
-                case 11:$time=1545;break;
-                case 12:$time=1630;break;
-                default:$time=950;
-            }
-        } elseif ($place == "kokura") {
-            switch ($race) {
-                case 1:$time=1000;break;
-                case 2:$time=1035;break;
-                case 3:$time=1105;break;
-                case 4:$time=1135;break;
-                case 5:$time=1225;break;
-                case 6:$time=1255;break;
-                case 7:$time=1325;break;
-                case 8:$time=1355;break;
-                case 9:$time=1425;break;
-                case 10:$time=1501;break;
-                case 11:$time=1535;break;
-                case 12:$time=1615;break;
-                default:$time=950;
-            }
-        } elseif ($place == "sapporo") {
-            switch ($race) {
-                case 1:$time=950;break;
-                case 2:$time=1025;break;
-                case 3:$time=1055;break;
-                case 4:$time=1125;break;
-                case 5:$time=1215;break;
-                case 6:$time=1245;break;
-                case 7:$time=1315;break;
-                case 8:$time=1345;break;
-                case 9:$time=1415;break;
-                case 10:$time=1450;break;
-                case 11:$time=1525;break;
-                case 12:$time=1605;break;
-                default:$time=950;
-            }
-        }
+        $time = intval($attributes["hour"])*100+intval($attributes["minute"]);
         // 発走6分前ごろから情報が出る
         if ($time % 100 <= 5) {
             $time -= 46; // 1000の6分前は994でなく954
@@ -106,7 +59,7 @@ class YumaAnalysisController extends Controller
 
     }
     public function extract_local(Request $request) {
-        $attributes = $request->only(['place','race','date']);
+        $attributes = $request->only(['place','race','date','hour','minute']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
         $year = intval($ymd[1][0]);
@@ -114,37 +67,7 @@ class YumaAnalysisController extends Controller
         $date = intval($ymd[3][0]);
         $race = intval($attributes["race"]);
         $place = $attributes["place"];
-        $time = 2040;
-        echo $year.$month.$date.$race.$place;
-        if ($place == "kanazawa") {
-            switch ($race) {
-                case 10:$time=1710;break;
-                case 11:$time=1745;break;
-                case 12:$time=1825;break;
-                default:$time=950;
-            }
-        } elseif ($place == "oi") {
-            switch ($race) {
-                case 10:$time=1930;break;
-                case 11:$time=2010;break;
-                case 12:$time=2050;break;
-                default:$time=950;
-            }
-        } elseif ($place == "sonoda") {
-            switch ($race) {
-                case 10:$time=1915;break;
-                case 11:$time=1955;break;
-                case 12:$time=2030;break;
-                default:$time=950;
-            }
-        } elseif ($place == "obihiro") {
-            switch ($race) {
-                case 10:$time=1940;break;
-                case 11:$time=2015;break;
-                case 12:$time=2045;break;
-                default:$time=950;
-            }
-        }
+        $time = intval($attributes["hour"])*100+intval($attributes["minute"]);
         // 発走6分前ごろから情報が出る
         if ($time % 100 <= 5) {
             $time -= 47;
@@ -249,8 +172,8 @@ class YumaAnalysisController extends Controller
     private function print_yuma_odds($odds_info, $umabans, $win_rates){
         $max_i = count($odds_info);
         $max_j = count($umabans);
-        $criteria = 0;
-        $criteria_hoken = 0;
+        $win_criteria = 0;
+        $win_criteria_hoken = 0;
         $cost = 0;
         $total_cost = 0;
         $exp_dividend = 0;
@@ -273,19 +196,19 @@ class YumaAnalysisController extends Controller
                         $exp = $actual_odds*floatval($win_rates[$j])/100;
                         $memo = "";
                         $memo2 = "";
-                        $cost = intval($exp*100 / $actual_odds)*100+100;
+                        $cost = intval($exp*(self::DIVIDEND_CRITERIA/100) / $actual_odds)*100+100;
                         if ($exp >= 1.5) {
                             $memo = "☆☆☆";
-                            $criteria += floatval($win_rates[$j]);
+                            $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                         } elseif ($exp >= 1.0) {
                             $memo = "☆☆";
-                            $criteria += floatval($win_rates[$j]);
+                            $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                         } elseif ($exp >= 0.8) {
                             $memo = "☆";
                             $memo2 = "保険として購入する";
-                            $criteria_hoken += floatval($win_rates[$j]);
+                            $win_criteria_hoken += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                         } elseif ($actual_odds < 10) {
                             $cost = 0;
@@ -296,7 +219,7 @@ class YumaAnalysisController extends Controller
                         } elseif ($exp*100 / $actual_odds <= 3) {
                             // 以下オッズ10倍以上の不人気馬且つ期待値0.8未満
                             // 300円で賄える範囲なら保険を掛ける
-                            $criteria_hoken += floatval($win_rates[$j]);
+                            $win_criteria_hoken += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                             $memo = "☆";
                             $memo2 = "保険として購入する(不人気)";
@@ -317,8 +240,8 @@ class YumaAnalysisController extends Controller
         }
         echo "</table><br>";
         echo "購入基準：勝率+保険発動率=7割以上、期待値8000は超えてほしい<br>";
-        echo "勝率：".sprintf("%.1f",$criteria)."％<br>";
-        echo "保険発動率：".sprintf("%.1f",$criteria_hoken)."％<br><br>";
+        echo "勝率：".sprintf("%.1f",$win_criteria)."％<br>";
+        echo "保険発動率：".sprintf("%.1f",$win_criteria_hoken)."％<br><br>";
         echo "コスト：".$total_cost."<br>";
         echo "期待値：".round($exp_dividend,0)."<br>";
     }
