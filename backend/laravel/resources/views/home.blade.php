@@ -68,6 +68,10 @@
         <option value="50">50</option>
         <option value="55">55</option>
       </select>分発走<br>
+      <select name="odds_damping_ratio">
+        <option value="1.0">検証モード(オッズ*1.0)</option>
+        <option value="0.75">本番モード(オッズ*0.75)</option>
+      </select><br>
       <button>期待値計算</button>
     </form>
     <br><br>
@@ -134,6 +138,10 @@
         <option value="50">50</option>
         <option value="55">55</option>
       </select>分発走<br>
+      <select name="odds_damping_ratio">
+        <option value="1.0">検証モード(オッズ*1.0)</option>
+        <option value="0.75">本番モード(オッズ*0.75)</option>
+      </select><br>
       <button>期待値計算(地方)</button>
     </form><br>
     ゆまちゃん競馬からの画像取り込み(laravel/downloadフォルダを作成する必要あり。chmod 777として)<br><br>

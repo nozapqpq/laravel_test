@@ -11,13 +11,11 @@ class YumaAnalysisController extends Controller
     // 期待値1の配当を何円とするか
     const DIVIDEND_CRITERIA = 10000;
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
-    //const ODDS_DAMPING_RATIO = 0.75;
-    const ODDS_DAMPING_RATIO = 1.0; // 確定オッズでのチェック用
     public function index() {
         return view('home');
     }
     public function extract(Request $request) {
-        $attributes = $request->only(['place','race','date','hour','minute']);
+        $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
         $year = intval($ymd[1][0]);
@@ -26,6 +24,7 @@ class YumaAnalysisController extends Controller
         $race = intval($attributes["race"]);
         $place = $attributes["place"];
         $time = intval($attributes["hour"])*100+intval($attributes["minute"]);
+        $odds_daming_ratio = floatval($attributes["odds_damping_ratio"]);
         // 発走6分前ごろから情報が出る
         if ($time % 100 <= 5) {
             $time -= 46; // 1000の6分前は994でなく954
@@ -48,7 +47,7 @@ class YumaAnalysisController extends Controller
         $umabans = $image_analysed[1];
         $win_rates = $image_analysed[2];
 
-        $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates);
+        $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
 
         echo "<br><br>";
         print_r($umabans);
@@ -59,7 +58,7 @@ class YumaAnalysisController extends Controller
 
     }
     public function extract_local(Request $request) {
-        $attributes = $request->only(['place','race','date','hour','minute']);
+        $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
         $year = intval($ymd[1][0]);
@@ -68,6 +67,7 @@ class YumaAnalysisController extends Controller
         $race = intval($attributes["race"]);
         $place = $attributes["place"];
         $time = intval($attributes["hour"])*100+intval($attributes["minute"]);
+        $odds_damping_ratio = floatval($attributes["odds_damping_ratio"]);
         // 発走6分前ごろから情報が出る
         if ($time % 100 <= 5) {
             $time -= 47;
@@ -90,7 +90,7 @@ class YumaAnalysisController extends Controller
         $umabans = $image_analysed[1];
         $win_rates = $image_analysed[2];
 
-        $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates);
+        $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
 
         echo "<br><br>";
         print_r($umabans);
@@ -169,7 +169,7 @@ class YumaAnalysisController extends Controller
 
         return $scrape_obj;
     }
-    private function print_yuma_odds($odds_info, $umabans, $win_rates){
+    private function print_yuma_odds($odds_info, $umabans, $win_rates, $odds_damping_ratio){
         $max_i = count($odds_info);
         $max_j = count($umabans);
         $win_criteria = 0;
@@ -187,7 +187,7 @@ class YumaAnalysisController extends Controller
             echo "<tr>";
             if (count($odds_info) > $i) {
                 // オッズは最後の5分でガクッと下がるので低めに見積もる
-                $actual_odds = round(floatval($odds_info[$i]["odds"])*self::ODDS_DAMPING_RATIO, 1);
+                $actual_odds = round(floatval($odds_info[$i]["odds"])*$odds_damping_ratio, 1);
                 echo "<td align=right>".$odds_info[$i]["umaban"]."</td>";
                 echo "<td align=center>".$odds_info[$i]["horsename"]."</td>";
                 echo "<td align=right>".$actual_odds."</td>";
