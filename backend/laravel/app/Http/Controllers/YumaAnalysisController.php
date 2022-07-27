@@ -205,7 +205,7 @@ class YumaAnalysisController extends Controller
                             $memo = "☆☆";
                             $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                        } elseif ($exp >= 0.8) {
+                        } elseif ($exp >= 0.75) {
                             $memo = "☆";
                             $memo2 = "保険として購入する";
                             $win_criteria_hoken += floatval($win_rates[$j]);
@@ -216,9 +216,9 @@ class YumaAnalysisController extends Controller
                                 $memo = "x";
                                 $memo2 = "高勝率の低期待値馬";
                             }
-                        } elseif ($exp*100 / $actual_odds <= 3) {
+                        } elseif ($exp*100 / $actual_odds <= 2) {
                             // 以下オッズ10倍以上の不人気馬且つ期待値0.8未満
-                            // 300円で賄える範囲なら保険を掛ける
+                            // 200円で賄える範囲なら保険を掛ける
                             $win_criteria_hoken += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
                             $memo = "☆";
@@ -239,10 +239,23 @@ class YumaAnalysisController extends Controller
             echo "</tr>";
         }
         echo "</table><br>";
-        echo "購入基準：勝率+保険発動率=7割以上、期待値8000は超えてほしい<br>";
         echo "勝率：".sprintf("%.1f",$win_criteria)."％<br>";
-        echo "保険発動率：".sprintf("%.1f",$win_criteria_hoken)."％<br><br>";
+        echo "保険発動率：".sprintf("%.1f",$win_criteria_hoken)."％<br>";
         echo "コスト：".$total_cost."<br>";
         echo "期待値：".round($exp_dividend,0)."<br>";
+        echo "購入判定：".$this->is_pass_buyable_criteria($exp_dividend, $total_cost)."<br>";
+        echo "NGでも高勝率高期待値の馬だけ買うのはアリ<br>";
+    }
+    // 購入基準を満たす場合trueを返す
+    // コストが安く(配当想定の0.75倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)
+    // または、配当期待値が相当に高いこと(期待値/コスト>=1.5)
+    private function is_pass_buyable_criteria($exp_dividend, $total_cost) {
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.75 && $exp_dividend/$total_cost >= 1.1) {
+            return "OK";
+        } elseif ($exp_dividend/$total_cost >= 1.5) {
+            return "OK?";
+        } else {
+            return "NG";
+        }
     }
 }
