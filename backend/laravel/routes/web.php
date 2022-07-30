@@ -25,7 +25,9 @@ Route::post('kaisai', 'App\Http\Controllers\KaisaiImportController@index');
 Route::get('yuma_analysis', 'App\Http\Controllers\YumaAnalysisController@index');
 Route::post('yuma_analysis/extract', 'App\Http\Controllers\YumaAnalysisController@extract');
 Route::post('yuma_analysis/extract_local', 'App\Http\Controllers\YumaAnalysisController@extract_local');
+Route::post('yuma_analysis/time_trigger', 'App\Http\Controllers\YumaAnalysisController@time_trigger');
 Route::get('home', 'App\Http\Controllers\HomeController@index');
+Route::get('auto_buy', 'App\Http\Controllers\HomeController@auto_buy');
 
 Route::get('page_abstruct', 'App\Http\Controllers\PageAbstructController@index');
 Route::get('page_routing', 'App\Http\Controllers\PageAbstructController@routing');

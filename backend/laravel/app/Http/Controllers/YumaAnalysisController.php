@@ -14,6 +14,63 @@ class YumaAnalysisController extends Controller
     public function index() {
         return view('home');
     }
+    // onloadを利用してボタンを押さずに自動的に購入する
+    // dateで指定した日付にかかわらず当日の、指定したレースの馬番を買ってしまうため正しく日付を指定したか確認すること
+    public function time_trigger(Request $request) {
+        $time_trigger_json = file_get_contents(self::DOWNLOAD_PATH."time_trigger.json");
+        $time_trigger_obj = json_decode($time_trigger_json,true);
+        $flg = false;
+        for ($i=0; $i<count($time_trigger_obj["hm"]); $i++) {
+            if (strtotime('+9 hour', strtotime(date('G:i:00'))) == strtotime(date($time_trigger_obj["hm"][$i]))){
+                $year = $time_trigger_obj["year"];
+                $month = $time_trigger_obj["month"];
+                $date = $time_trigger_obj["date"];
+                $odds_damping_ratio = $time_trigger_obj["odds_damping_ratio"];
+                $race = $time_trigger_obj["race"][$i];
+                $place = $time_trigger_obj["place"][$i];
+                $time = $time_trigger_obj["time"][$i];
+                $flg = true;
+                echo $year.$month.$date.$odds_damping_ratio."<br>";
+                break;
+            }
+        }
+        if ($flg == true) {
+            if ($time % 100 <= 5) {
+                $time -= 46; // 1000の6分前は994でなく954
+            } else {
+                $time -= 6;
+            }
+            // 前回のデータが残ったまま新しいデータができないと結果がおかしくなることがあるので一応諸々削除
+            if (file_exists(self::DOWNLOAD_PATH."auto_buy.json")){
+                unlink(self::DOWNLOAD_PATH."auto_buy.json");
+                unlink(self::DOWNLOAD_PATH."scrape_output.json");
+                unlink(self::DOWNLOAD_PATH."yuma_temp.jpg");
+                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri.png");
+            }
+
+            echo $year."/".$month."/".$date."(".$race."R)".$place.$time."<br>";
+            
+            $scrape_input = array('place'=>$place,'year'=>$year,'month'=>$month,'date'=>$date,'race'=>$race);
+    
+            // データ処理本体
+            // ゆまちゃん画像取得、白塗り
+            $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
+            // 画像解析
+            $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
+            // オッズ取得
+            $scrape_obj = $this->exec_odds_scraper($scrape_input);
+    
+            // 出力、データ解析
+            $umabans = $image_analysed[1];
+            $win_rates = $image_analysed[2];
+    
+            $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
+            sleep(6);
+        }
+        echo "redirect<br>";
+        sleep(4);
+        return redirect('auto_buy');
+    }
     public function extract(Request $request) {
         $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
@@ -39,7 +96,7 @@ class YumaAnalysisController extends Controller
         // ゆまちゃん画像取得、白塗り
         $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
         // 画像解析
-        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.jpg');
+        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
         // オッズ取得
         $scrape_obj = $this->exec_odds_scraper($scrape_input);
 
@@ -54,8 +111,7 @@ class YumaAnalysisController extends Controller
         echo "<br>";
         print_r($win_rates);
         echo "<br>";
-        print_r($scrape_obj["odds_info"]);
-
+        print_r($scrape_obj["odds_info"]);     
     }
     public function extract_local(Request $request) {
         $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
@@ -82,7 +138,7 @@ class YumaAnalysisController extends Controller
         // ゆまちゃん画像取得、白塗り
         $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
         // 画像解析
-        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.jpg');
+        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
         // オッズ取得
         $scrape_obj = $this->exec_odds_scraper_local($scrape_input);
 
@@ -173,10 +229,14 @@ class YumaAnalysisController extends Controller
         $max_i = count($odds_info);
         $max_j = count($umabans);
         $win_criteria = 0;
-        $win_criteria_hoken = 0;
         $cost = 0;
         $total_cost = 0;
         $exp_dividend = 0;
+        $bad_exp_count = 0; // オッズ10倍以内で期待値が0.55～0.9未満の馬が3頭いる場合は惜しいところで悲惨になりそうなので買わない
+        $auto_buy_array = [
+            'umaban'=>[],
+            'buy'=>[]
+        ];
 
         echo "<table border=1>";
         echo "<tr>";
@@ -195,65 +255,54 @@ class YumaAnalysisController extends Controller
                     if ($umabans[$j] == $odds_info[$i]["umaban"]) {
                         $exp = $actual_odds*floatval($win_rates[$j])/100;
                         $memo = "";
-                        $memo2 = "";
                         $cost = intval($exp*(self::DIVIDEND_CRITERIA/100) / $actual_odds)*100+100;
-                        if ($exp >= 1.5) {
-                            $memo = "☆☆☆";
-                            $win_criteria += floatval($win_rates[$j]);
-                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                        } elseif ($exp >= 1.0) {
+                        // 無条件期待値0.8以上、または高オッズのため少額で期待値0.4以上をカバーできる馬は買い
+                        if ($exp >= 0.8 || $exp*100/$actual_odds <= 1.5 && $exp >= 0.4) {
                             $memo = "☆☆";
                             $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                        } elseif ($exp >= 0.75) {
-                            $memo = "☆";
-                            $memo2 = "保険として購入する";
-                            $win_criteria_hoken += floatval($win_rates[$j]);
-                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                        } elseif ($actual_odds < 10) {
-                            $cost = 0;
-                            if ($actual_odds > 0) {
-                                $memo = "x";
-                                $memo2 = "高勝率の低期待値馬";
-                            }
-                        } elseif ($exp*100 / $actual_odds <= 2) {
-                            // 以下オッズ10倍以上の不人気馬且つ期待値0.8未満
-                            // 200円で賄える範囲なら保険を掛ける
-                            $win_criteria_hoken += floatval($win_rates[$j]);
-                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
-                            $memo = "☆";
-                            $memo2 = "保険として購入する(不人気)";
+                            $auto_buy_array['umaban'][] = $odds_info[$i]['umaban'];
+                            $auto_buy_array['buy'][] = $cost/100;
                         } else {
                             $cost = 0;
+                            // 買うと不幸になるレースを排除(惜しい期待値で買ってないし来る確率が高い馬がたくさんいる場合)
+                            if ($exp >= 0.55 && $exp < 0.8 && $actual_odds < 6) {
+                                $bad_exp_count += 1;
+                            }
                         }
                         $total_cost += $cost;
                         echo "<td align=right>".$win_rates[$j]."</td>";
                         echo "<td align=right>".sprintf("%.2f", $exp)."</td>";
                         echo "<td align=center>".$memo."</td>";
                         echo "<td align=right>".$cost."</td>";
-                        echo "<td>".$memo2."</td>";
                         break;
                     }
                 }
             }
             echo "</tr>";
         }
+        $judge = $this->is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count);
         echo "</table><br>";
         echo "勝率：".sprintf("%.1f",$win_criteria)."％<br>";
-        echo "保険発動率：".sprintf("%.1f",$win_criteria_hoken)."％<br>";
         echo "コスト：".$total_cost."<br>";
         echo "期待値：".round($exp_dividend,0)."<br>";
-        echo "購入判定：".$this->is_pass_buyable_criteria($exp_dividend, $total_cost)."<br>";
-        echo "NGでも高勝率高期待値の馬だけ買うのはアリ<br>";
+        echo "人気で期待値が惜しい馬：".$bad_exp_count."頭<br>";
+        echo "購入判定：".$judge."<br>";
+        if ($judge == "NG") {
+            unset($auto_buy_array['umaban']);
+            unset($auto_buy_array['buy']);
+        }
+        $json = json_encode($auto_buy_array);
+        file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
+        $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
+        //exec($command,$output);
     }
     // 購入基準を満たす場合trueを返す
-    // コストが安く(配当想定の0.75倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)
-    // または、配当期待値が相当に高いこと(期待値/コスト>=1.5)
-    private function is_pass_buyable_criteria($exp_dividend, $total_cost) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.75 && $exp_dividend/$total_cost >= 1.1) {
+    // コストが安く(配当想定の0.8倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)
+    // 勝率が40.0%以上であるか、コストが期待の1/3未満であること
+    private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $exp_dividend/$total_cost >= 1.1 && ($win_criteria >= 40.0 || $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/3) && $bad_exp_count < 2) {
             return "OK";
-        } elseif ($exp_dividend/$total_cost >= 1.5) {
-            return "OK?";
         } else {
             return "NG";
         }

@@ -9,6 +9,9 @@ class HomeController extends Controller
     public function index() {
         return view('home');
     }
+    public function auto_buy() {
+        return view('auto_buy');
+    }
 
     // テスト用のサンプルメソッド
     // 電話番号をxxx-xxx-xxxxの形で返す
