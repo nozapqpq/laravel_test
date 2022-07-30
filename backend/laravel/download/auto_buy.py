@@ -45,14 +45,12 @@ def buy(place, race_no, buy_list):
     time.sleep(sleep_sec)
     driver.find_element(By.ID,'sum').send_keys(str(all_buy_amount))
     time.sleep(sleep_sec)
-    '''
     driver.find_element(By.LINK_TEXT,'投票').click()
     time.sleep(sleep_sec)
     Alert(driver).accept()
     time.sleep(sleep_sec)
     driver.find_element(By.LINK_TEXT,'続けて通常投票').click()#通常投票画面に返る
     time.sleep(sleep_sec)
-    '''
     with open('/var/www/laravel/download/auto_buy.log','a') as f:
         buy_time = str(datetime.datetime.now()+datetime.timedelta(hours=9))
         f.write(str([buy_time,all_buy_amount,buy_list])+"\n")
