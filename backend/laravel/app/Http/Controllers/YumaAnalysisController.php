@@ -56,13 +56,34 @@ class YumaAnalysisController extends Controller
             // ゆまちゃん画像取得、白塗り
             $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
             // 画像解析
-            $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
+            // 4パターンの塗りつぶしで解析を行い、画像処理ミス率を減らしている(精度不足をゴリ押しでカバー)
+            $image_analysed1 = $this->analyse_yuma_image('yuma_temp_shironuri1.png');
+            $image_analysed2 = $this->analyse_yuma_image('yuma_temp_shironuri2.png');
+            $image_analysed3 = $this->analyse_yuma_image('yuma_temp_shironuri3.png');
+            $image_analysed4 = $this->analyse_yuma_image('yuma_temp_shironuri4.png');
+            for ($i=0;$i<count($image_analysed2[1]);$i++) {
+                if (in_array($image_analysed2[1][$i],$image_analysed1[1]) == false) {
+                    $image_analysed1[1][] = $image_analysed2[1][$i];
+                    $image_analysed1[2][] = $image_analysed2[2][$i];
+                }
+            }
+            for ($i=0;$i<count($image_analysed3[1]);$i++) {
+                if (in_array($image_analysed3[1][$i],$image_analysed1[1]) == false) {
+                    $image_analysed1[1][] = $image_analysed3[1][$i];
+                    $image_analysed1[2][] = $image_analysed3[2][$i];
+                }
+            }
+            for ($i=0;$i<count($image_analysed4[1]);$i++) {
+                if (in_array($image_analysed4[1][$i],$image_analysed1[1]) == false) {
+                    $image_analysed1[1][] = $image_analysed4[1][$i];
+                    $image_analysed1[2][] = $image_analysed4[2][$i];
+                }
+            }
             // オッズ取得
             $scrape_obj = $this->exec_odds_scraper($scrape_input);
-    
             // 出力、データ解析
-            $umabans = $image_analysed[1];
-            $win_rates = $image_analysed[2];
+            $umabans = $image_analysed1[1];
+            $win_rates = $image_analysed1[2];
     
             $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
             $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
@@ -98,13 +119,34 @@ class YumaAnalysisController extends Controller
         // ゆまちゃん画像取得、白塗り
         $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
         // 画像解析
-        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
+        // 4パターンの塗りつぶしで解析を行い、画像処理ミス率を減らしている(精度不足をゴリ押しでカバー)
+        $image_analysed1 = $this->analyse_yuma_image('yuma_temp_shironuri1.png');
+        $image_analysed2 = $this->analyse_yuma_image('yuma_temp_shironuri2.png');
+        $image_analysed3 = $this->analyse_yuma_image('yuma_temp_shironuri3.png');
+        $image_analysed4 = $this->analyse_yuma_image('yuma_temp_shironuri4.png');
+        for ($i=0;$i<count($image_analysed2[1]);$i++) {
+            if (in_array($image_analysed2[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed2[1][$i];
+                $image_analysed1[2][] = $image_analysed2[2][$i];
+            }
+        }
+        for ($i=0;$i<count($image_analysed3[1]);$i++) {
+            if (in_array($image_analysed3[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed3[1][$i];
+                $image_analysed1[2][] = $image_analysed3[2][$i];
+            }
+        }
+        for ($i=0;$i<count($image_analysed4[1]);$i++) {
+            if (in_array($image_analysed4[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed4[1][$i];
+                $image_analysed1[2][] = $image_analysed4[2][$i];
+            }
+        }
         // オッズ取得
         $scrape_obj = $this->exec_odds_scraper($scrape_input);
-
         // 出力、データ解析
-        $umabans = $image_analysed[1];
-        $win_rates = $image_analysed[2];
+        $umabans = $image_analysed1[1];
+        $win_rates = $image_analysed1[2];
 
         $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
 
@@ -140,13 +182,34 @@ class YumaAnalysisController extends Controller
         // ゆまちゃん画像取得、白塗り
         $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
         // 画像解析
-        $image_analysed = $this->analyse_yuma_image('yuma_temp_shironuri.png');
+        // 4パターンの塗りつぶしで解析を行い、画像処理ミス率を減らしている(精度不足をゴリ押しでカバー)
+        $image_analysed1 = $this->analyse_yuma_image('yuma_temp_shironuri1.png');
+        $image_analysed2 = $this->analyse_yuma_image('yuma_temp_shironuri2.png');
+        $image_analysed3 = $this->analyse_yuma_image('yuma_temp_shironuri3.png');
+        $image_analysed4 = $this->analyse_yuma_image('yuma_temp_shironuri4.png');
+        for ($i=0;$i<count($image_analysed2[1]);$i++) {
+            if (in_array($image_analysed2[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed2[1][$i];
+                $image_analysed1[2][] = $image_analysed2[2][$i];
+            }
+        }
+        for ($i=0;$i<count($image_analysed3[1]);$i++) {
+            if (in_array($image_analysed3[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed3[1][$i];
+                $image_analysed1[2][] = $image_analysed3[2][$i];
+            }
+        }
+        for ($i=0;$i<count($image_analysed4[1]);$i++) {
+            if (in_array($image_analysed4[1][$i],$image_analysed1[1]) == false) {
+                $image_analysed1[1][] = $image_analysed4[1][$i];
+                $image_analysed1[2][] = $image_analysed4[2][$i];
+            }
+        }
         // オッズ取得
         $scrape_obj = $this->exec_odds_scraper_local($scrape_input);
-
         // 出力、データ解析
-        $umabans = $image_analysed[1];
-        $win_rates = $image_analysed[2];
+        $umabans = $image_analysed1[1];
+        $win_rates = $image_analysed1[2];
 
         $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
 
@@ -298,9 +361,9 @@ class YumaAnalysisController extends Controller
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
     }
     // 購入基準を満たす場合trueを返す
-    // コストが安く(配当想定の0.75倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
+    // コストが安く(配当想定の0.8倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.75 && $bad_exp_count < 1 && 
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $bad_exp_count < 1 && 
             ($exp_dividend/$total_cost >= 1.1 && $win_criteria >= 40.0 || 
              $exp_dividend/$total_cost >= 1.5 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
         ) {
