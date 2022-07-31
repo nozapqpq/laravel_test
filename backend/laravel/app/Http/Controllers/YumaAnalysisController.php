@@ -268,7 +268,7 @@ class YumaAnalysisController extends Controller
                         } else {
                             $cost = 0;
                             // オッズ3倍を切るような馬が、ギリギリ買えないような期待値だった場合にカウント
-                            if ($exp >= 0.5 && $exp < 0.8 && $actual_odds < 3.0) {
+                            if ($exp >= 0.5 && $exp < 0.8 && $actual_odds < 2.5) {
                                 $bad_exp_count += 1;
                             }
                         }
