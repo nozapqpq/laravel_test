@@ -301,7 +301,7 @@ class YumaAnalysisController extends Controller
     // コストが安く(配当想定の0.8倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)
     // 勝率が40.0%以上であるか、コストが期待の1/3未満であること
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $exp_dividend/$total_cost >= 1.1 && ($win_criteria >= 40.0 || $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/3) && $bad_exp_count < 2) {
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $exp_dividend/$total_cost >= 1.1 && ($win_criteria >= 40.0 || $win_criteria >= 30.0 && $total_cost < self::DIVIDEND_CRITERIA/2) && $bad_exp_count < 2) {
             return "OK";
         } else {
             return "NG";
