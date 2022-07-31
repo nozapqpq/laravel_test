@@ -96,7 +96,6 @@ class YumaAnalysisController extends Controller
         return redirect('auto_buy');
     }
     public function extract(Request $request) {
-        phpinfo();
         $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
