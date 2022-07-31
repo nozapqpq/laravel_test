@@ -88,13 +88,15 @@ class YumaAnalysisController extends Controller
             $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
             $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
             exec($command,$output);
-            sleep(2);
+            // sleep以外のtimeout対策：/usr/local/etc/php/php.iniのmax_execution_timeを書き換えて再起動
+            sleep(8);
         }
         echo "redirect<br>";
         sleep(2);
         return redirect('auto_buy');
     }
     public function extract(Request $request) {
+        phpinfo();
         $attributes = $request->only(['place','race','date','hour','minute','odds_damping_ratio']);
         preg_match_all('/(\d+)-(\d+)-(\d+)/',$attributes["date"],$ymd);
 
