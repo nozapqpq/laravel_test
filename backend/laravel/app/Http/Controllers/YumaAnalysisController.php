@@ -88,7 +88,7 @@ class YumaAnalysisController extends Controller
             $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
             $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
             exec($command,$output);
-            sleep(3);
+            sleep(2);
         }
         echo "redirect<br>";
         sleep(2);

@@ -49,11 +49,12 @@ def buy(place, race_no, buy_list):
     time.sleep(sleep_sec)
     Alert(driver).accept()
     time.sleep(sleep_sec)
-    driver.find_element(By.LINK_TEXT,'続けて通常投票').click()#通常投票画面に返る
-    time.sleep(sleep_sec)
     with open('/var/www/laravel/download/auto_buy.log','a') as f:
         buy_time = str(datetime.datetime.now()+datetime.timedelta(hours=9))
         f.write(str([buy_time,all_buy_amount,buy_list])+"\n")
+    driver.find_element(By.LINK_TEXT,'続けて通常投票').click()#通常投票画面に返る
+    time.sleep(sleep_sec)
+
 
 
 options= ChromeOptions()
@@ -71,7 +72,7 @@ buy_info_json_open = open('/var/www/laravel/download/auto_buy.json','r')
 buy_info_json = json.load(buy_info_json_open)
 
 if len(buy_info_json) > 0:
-    sleep_sec = 400/1000
+    sleep_sec = 300/1000
     print(place_kanji_dict[race_info_json['place']],race_info_json['race'])
     print(buy_info_json)
     login("","","")

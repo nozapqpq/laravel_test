@@ -101,7 +101,7 @@ class OddsTable:
                         with open(kaisai_json_fn,'w') as f:
                             json.dump(kaisai_list, f, ensure_ascii=False)
                         return url
-                    time.sleep(1)
+                    time.sleep(500/1000)
         return none
 
 # メイン処理、入力レースのオッズデータをjsonファイルに書き出す
