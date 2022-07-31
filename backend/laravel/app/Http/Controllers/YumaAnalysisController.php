@@ -9,7 +9,7 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 class YumaAnalysisController extends Controller
 {
     // 期待値1の配当を何円とするか
-    const DIVIDEND_CRITERIA = 10000;
+    const DIVIDEND_CRITERIA = 40000;
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
     public function index() {
         return view('home');
@@ -51,7 +51,7 @@ class YumaAnalysisController extends Controller
             echo $year."/".$month."/".$date."(".$race."R)".$place.$time."<br>";
             
             $scrape_input = array('place'=>$place,'year'=>$year,'month'=>$month,'date'=>$date,'race'=>$race);
-    
+
             // データ処理本体
             // ゆまちゃん画像取得、白塗り
             $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
@@ -295,7 +295,7 @@ class YumaAnalysisController extends Controller
         $json = json_encode($auto_buy_array);
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
         $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
-        //exec($command,$output);
+        exec($command,$output);
     }
     // 購入基準を満たす場合trueを返す
     // コストが安く(配当想定の0.8倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)

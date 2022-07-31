@@ -169,9 +169,6 @@
     wget https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip<br>
     (unzipして/usr/local/binにchromedriverを置く)<br><br>
 
-    [TODO]<br>
-    地方競馬対応<br>
-    自動的に買う<br>
     <p>DBに追加したい開催情報のCSVデータを選択してください。</p>
     <form action="kaisai" method="post" enctype="multipart/form-data">
       @csrf // [TODO] DBへの追加のとき用のチェックボックスをつくる。ONのとき、最初にdeleteせずに追加する<br>
