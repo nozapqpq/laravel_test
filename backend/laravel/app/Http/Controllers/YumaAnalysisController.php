@@ -265,8 +265,8 @@ class YumaAnalysisController extends Controller
                             $auto_buy_array['buy'][] = $cost/100;
                         } else {
                             $cost = 0;
-                            // 買うと不幸になるレースを排除(惜しい期待値で買ってないし来る確率が高い馬がたくさんいる場合)
-                            if ($exp >= 0.45 && $exp < 0.8 && $actual_odds < 5) {
+                            // オッズ3倍を切るような馬が、ギリギリ買えないような期待値だった場合にカウント
+                            if ($exp >= 0.5 && $exp < 0.8 && $actual_odds < 3.0) {
                                 $bad_exp_count += 1;
                             }
                         }
@@ -298,10 +298,9 @@ class YumaAnalysisController extends Controller
         exec($command,$output);
     }
     // 購入基準を満たす場合trueを返す
-    // コストが安く(配当想定の0.8倍以下)、配当期待値が高いこと(期待値/コスト>=1.1)
-    // 勝率が40.0%以上であるか、コストが期待の1/3未満であること
+    // コストが安く(配当想定の0.8倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $bad_exp_count < 2 && 
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $bad_exp_count < 1 && 
             ($exp_dividend/$total_cost >= 1.1 && $win_criteria >= 40.0 || 
              $exp_dividend/$total_cost >= 1.5 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
         ) {
