@@ -256,8 +256,8 @@ class YumaAnalysisController extends Controller
                         $exp = $actual_odds*floatval($win_rates[$j])/100;
                         $memo = "";
                         $cost = intval($exp*(self::DIVIDEND_CRITERIA/100) / $actual_odds)*100+100;
-                        // 無条件期待値0.8以上、または高オッズのため少額で期待値0.4以上をカバーできる馬は買い
-                        if ($exp >= 0.8 || $exp*100/$actual_odds <= 1.5 && $exp >= 0.4) {
+                        // 無条件期待値0.8以上、または高オッズのため少額で期待値0.6以上をカバーできる馬は買い
+                        if ($exp >= 0.8 || $exp*100/$actual_odds <= 1.5 && $exp >= 0.6) {
                             $memo = "☆☆";
                             $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
