@@ -65,6 +65,8 @@ class YumaAnalysisController extends Controller
             $win_rates = $image_analysed[2];
     
             $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
+            $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
+            exec($command,$output);
             sleep(3);
         }
         echo "redirect<br>";
@@ -294,14 +296,12 @@ class YumaAnalysisController extends Controller
         }
         $json = json_encode($auto_buy_array);
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
-        $command="python3 ".self::DOWNLOAD_PATH."auto_buy.py ";
-        exec($command,$output);
     }
     // 購入基準を満たす場合trueを返す
-    // コストが安く(配当想定の0.8倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
+    // コストが安く(配当想定の0.75倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $bad_exp_count < 1 && 
-            ($exp_dividend/$total_cost >= 1.1 && $win_criteria >= 40.0 || 
+        if ($total_cost <= self::DIVIDEND_CRITERIA*0.75 && $bad_exp_count < 1 && 
+            ($exp_dividend/$total_cost >= 1.0 && $win_criteria >= 40.0 || 
              $exp_dividend/$total_cost >= 1.5 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
         ) {
             return "OK";

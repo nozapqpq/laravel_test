@@ -43,7 +43,7 @@ class OddsTable:
             if "Horse_Name" in td.get_attribute('class'):
                 horsename = td.text
             if "Odds" in td.get_attribute('class'):
-                if td.text in ["取消","除外","中止"]:
+                if td.text in ["取消","除外","中止","---.-"]:
                     odds = -1
                 else:
                     odds = float(td.text)
