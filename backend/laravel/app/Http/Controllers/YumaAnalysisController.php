@@ -302,7 +302,7 @@ class YumaAnalysisController extends Controller
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
         if ($total_cost <= self::DIVIDEND_CRITERIA*0.75 && $bad_exp_count < 1 && 
             ($exp_dividend/$total_cost >= 1.1 && $win_criteria >= 40.0 || 
-             $exp_dividend/$total_cost >= 1.5 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
+             $exp_dividend/$total_cost >= 1.3 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
         ) {
             return "OK";
         } else {
