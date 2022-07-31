@@ -266,7 +266,7 @@ class YumaAnalysisController extends Controller
                         } else {
                             $cost = 0;
                             // 買うと不幸になるレースを排除(惜しい期待値で買ってないし来る確率が高い馬がたくさんいる場合)
-                            if ($exp >= 0.55 && $exp < 0.8 && $actual_odds < 6) {
+                            if ($exp >= 0.45 && $exp < 0.8 && $actual_odds < 5) {
                                 $bad_exp_count += 1;
                             }
                         }
