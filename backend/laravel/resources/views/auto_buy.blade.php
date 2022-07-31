@@ -8,7 +8,7 @@
   <title>自動購入</title>
 </head>
 
-<body onload="setTimeout(function(){document.time.submit()},33000);">
+<body onload="setTimeout(function(){document.time.submit()},38000);">
 
   <div class="upload">
     <form name="time" action="yuma_analysis/time_trigger" method="post">

@@ -65,10 +65,10 @@ class YumaAnalysisController extends Controller
             $win_rates = $image_analysed[2];
     
             $this->print_yuma_odds($scrape_obj["odds_info"], $umabans, $win_rates, $odds_damping_ratio);
-            sleep(6);
+            sleep(3);
         }
         echo "redirect<br>";
-        sleep(4);
+        sleep(2);
         return redirect('auto_buy');
     }
     public function extract(Request $request) {
