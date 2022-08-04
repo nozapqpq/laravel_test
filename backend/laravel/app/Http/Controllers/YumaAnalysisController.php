@@ -9,7 +9,9 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 class YumaAnalysisController extends Controller
 {
     // 期待値1の配当を何円とするか
-    const DIVIDEND_CRITERIA = 40000;
+    const BUY_EXP_CRITERIA = 0.8;
+    const DIVIDEND_CRITERIA = 150000;
+    const UPPER_COST = self::DIVIDEND_CRITERIA*0.75;
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
     public function index() {
         return view('home');
@@ -323,7 +325,7 @@ class YumaAnalysisController extends Controller
                         $memo = "";
                         $cost = intval($exp*(self::DIVIDEND_CRITERIA/100) / $actual_odds)*100+100;
                         // 期待値0.8以上の馬は買い
-                        if ($exp >= 0.8) {
+                        if ($exp >= self::BUY_EXP_CRITERIA) {
                             $memo = "☆☆";
                             $win_criteria += floatval($win_rates[$j]);
                             $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
@@ -332,7 +334,7 @@ class YumaAnalysisController extends Controller
                         } else {
                             $cost = 0;
                             // オッズ3倍を切るような馬が、ギリギリ買えないような期待値だった場合にカウント
-                            if ($exp >= 0.5 && $exp < 0.8 && $actual_odds < 2.5) {
+                            if ($exp >= 0.4 && $exp < self::BUY_EXP_CRITERIA && $actual_odds < 2.8) {
                                 $bad_exp_count += 1;
                             }
                         }
@@ -352,6 +354,9 @@ class YumaAnalysisController extends Controller
         echo "勝率：".sprintf("%.1f",$win_criteria)."％<br>";
         echo "コスト：".$total_cost."<br>";
         echo "期待値：".round($exp_dividend,0)."<br>";
+        echo "目標期待値に対する期待値比：".round($exp_dividend/self::DIVIDEND_CRITERIA*100,1)."％(100％以下は✕)<br>";
+        echo "目標期待値に対するコスト比：".round($total_cost/self::DIVIDEND_CRITERIA*100,1)."％(75％以上は✕)<br>";
+        echo "コスト期待値比：".round($exp_dividend/$total_cost,1)."(1.5以上で◎)<br>";
         echo "人気で期待値が惜しい馬：".$bad_exp_count."頭<br>";
         echo "購入判定：".$judge."<br>";
         if ($judge == "NG") {
@@ -362,11 +367,13 @@ class YumaAnalysisController extends Controller
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
     }
     // 購入基準を満たす場合trueを返す
-    // コストが安く(配当想定の0.8倍以下)、オッズ3倍を切るような馬が候補外で中途半端に高い期待値でなく、候補馬たちの配当期待値が高いこと
+    // 高確率で勝つ低期待値人気馬が不在で、期待値が目標期待値を上回っているか(コスト上限あり)、期待値コスト比が1.5以上(コスト条件なし)
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*0.8 && $bad_exp_count < 1 && 
-            ($exp_dividend/$total_cost >= 1.1 && $win_criteria >= 40.0 || 
-             $exp_dividend/$total_cost >= 1.5 && $win_criteria >= 25.0 && $total_cost < self::DIVIDEND_CRITERIA/2)
+        if ($total_cost <= self::DIVIDEND_CRITERIA*1.0 && $bad_exp_count < 1 && 
+            (
+             $exp_dividend > self::DIVIDEND_CRITERIA*1.0 && $total_cost <= self::UPPER_COST || 
+             $exp_dividend/$total_cost > 1.5
+            )
         ) {
             return "OK";
         } else {
