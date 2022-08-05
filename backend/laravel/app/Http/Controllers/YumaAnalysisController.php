@@ -59,7 +59,14 @@ class YumaAnalysisController extends Controller
 
             // データ処理本体
             // ゆまちゃん画像取得、白塗り
+            // 画像取得に失敗したら処理を行わず次のサイクルを回す
             $this->exec_yuma_shironuri($year, $month, $date, $time,'yuma_temp.jpg');
+            $response = @file_get_contents(self::DOWNLOAD_PATH.'yuma_temp.jpg');
+            if ($response === false) {
+                echo "yuma image not found.<br>";
+                sleep(15);
+                return redirect('auto_buy');
+            }
             // 画像解析
             // 4パターンの塗りつぶしで解析を行い、画像処理ミス率を減らしている(精度不足をゴリ押しでカバー)
             $image_analysed1 = $this->analyse_yuma_image('yuma_temp_shironuri1.png');
@@ -229,7 +236,8 @@ class YumaAnalysisController extends Controller
     }
     // ゆまちゃん競馬から画像を取り込む(python実行)
     private function exec_yuma_shironuri($year, $month, $date, $time, $filename) {
-        for ($i=0;$i<400;$i++) { // 3分間で画像が出力されている前提
+        $img_exist_flg = false;
+        for ($i=0;$i<300;$i++) { // 3分間で画像が出力されている前提
             if ($i % 100 >= 60) {
                 continue;
             }
@@ -240,9 +248,13 @@ class YumaAnalysisController extends Controller
             $image_path = sprintf("https://cdn-ak.f.st-hatena.com/images/fotolife/a/ai_yuma/%04d%02d%02d/%04d%02d%02d%06d.png",$year,$month,$date,$year,$month,$date,$time_sec);
             $response = @file_get_contents($image_path);
             if ($response !== false) {
+                $img_exist_flg = true;
                 echo $image_path."<br>";
                 break;
             }
+        }
+        if ($img_exist_flg == false) {
+            return;
         }
         $image = file_get_contents($image_path);
         $save_path = self::DOWNLOAD_PATH.$filename;
@@ -370,12 +382,12 @@ class YumaAnalysisController extends Controller
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
     }
     // 購入基準を満たす場合trueを返す
-    // 高確率で勝つ低期待値人気馬が不在で、期待値が目標期待値を上回っているか(コスト上限あり)、期待値コスト比が1.5以上(コスト条件なし)
+    // 高確率で勝つ低期待値人気馬が不在で、期待値が目標期待値を上回っているか(コスト上限あり)、期待値コスト比が1.3超(コスト条件なし)
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
         if ($total_cost <= self::DIVIDEND_CRITERIA*1.0 && $bad_exp_count < 1 && 
             (
              $exp_dividend > self::DIVIDEND_CRITERIA*1.0 && $total_cost <= self::UPPER_COST || 
-             $exp_dividend/$total_cost > 1.5
+             $exp_dividend/$total_cost > 1.3
             )
         ) {
             return "OK";
