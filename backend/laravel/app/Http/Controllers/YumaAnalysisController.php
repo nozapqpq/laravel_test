@@ -47,7 +47,10 @@ class YumaAnalysisController extends Controller
                 unlink(self::DOWNLOAD_PATH."auto_buy.json");
                 unlink(self::DOWNLOAD_PATH."scrape_output.json");
                 unlink(self::DOWNLOAD_PATH."yuma_temp.jpg");
-                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri.png");
+                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri1.png");
+                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri2.png");
+                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri3.png");
+                unlink(self::DOWNLOAD_PATH."yuma_temp_shironuri4.png");
             }
 
             echo $year."/".$month."/".$date."(".$race."R)".$place.$time."<br>";
