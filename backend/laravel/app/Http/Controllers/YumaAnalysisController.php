@@ -9,9 +9,7 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 class YumaAnalysisController extends Controller
 {
     // 期待値1の配当を何円とするか
-    const BUY_EXP_CRITERIA = 0.8;
-    const DIVIDEND_CRITERIA = 150000;
-    const UPPER_COST = self::DIVIDEND_CRITERIA*0.75;
+    const COST_CRITERIA = 100000;
     const DOWNLOAD_PATH = '/var/www/laravel/download/';
     public function index() {
         return view('home');
@@ -312,67 +310,89 @@ class YumaAnalysisController extends Controller
         $max_i = count($odds_info);
         $max_j = count($umabans);
         $win_criteria = 0;
-        $cost = 0;
-        $total_cost = 0;
+        $cost = [];
+        $exp = [];
+        $normalized_exp = [];
+        $normalized_win_rate = [];
         $exp_dividend = 0;
-        $bad_exp_count = 0; // オッズ10倍以内で期待値が0.55～0.9未満の馬が3頭いる場合は惜しいところで悲惨になりそうなので買わない
+        $bad_exp_count = 0; // 勝率20%以上で期待値が1未満の馬が2頭以上いる場合は惜しいところで悲惨になりそうなので買わない
         $auto_buy_array = [
             'umaban'=>[],
             'buy'=>[]
         ];
-
+        // ゆまちゃん画像からの勝率データは馬番昇順に並んでないので必ず$win_rates[$j]で採る必要あり
+        for ($i=0;$i<$max_i;$i++) {
+            if (count($odds_info) > $i) {
+                $actual_odds[] = round(floatval($odds_info[$i]["odds"])*$odds_damping_ratio, 1);
+                for ($j=0;$j<$max_j;$j++) {
+                    if ($umabans[$j] == $odds_info[$i]["umaban"]) {
+                        $exp[] = end($actual_odds)*floatval($win_rates[$j])/100;
+                        if (end($actual_odds) == -1) {
+                            $normalized_exp[] = 0;
+                            $normalized_win_rate[] = 0;
+                        } else {
+                            $normalized_exp[] = pow(end($exp),1.5)/(log10(end($actual_odds))+0.3); // $odds_damping_ratioが原因でlogxの値が0になるのを回避するための+0.3。不人気の高期待値のオッズは下がり方がえげつないので1.5乗して下がり幅と相殺
+                            $normalized_win_rate[] = round($win_rates[$j]*end($normalized_exp),2);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // 配列準備完了後にコスト、期待値集計を行う
+        for ($i=0;$i<$max_i;$i++) {
+            if (count($odds_info) > $i) {
+                for ($j=0;$j<$max_j;$j++) {
+                    if ($umabans[$j] == $odds_info[$i]["umaban"]){
+                        $cost[] = round(self::COST_CRITERIA*$normalized_win_rate[$i]/array_sum($normalized_win_rate)/100,0)*100;
+                        $dividend = $actual_odds[$i]*$cost[$i]*(floatval($win_rates[$j])/100);
+                        $exp_dividend += $dividend;
+                        if ($cost[$i]*$actual_odds[$i] > self::COST_CRITERIA) {
+                            $win_criteria += floatval($win_rates[$j]);
+                        } elseif ($win_rates[$j] >= 20.0) {
+                            $bad_exp_count += 1;
+                        }
+                    }
+                }
+            }
+            
+        }
         echo "<table border=1>";
         echo "<tr>";
-        echo "<td>馬番</td><td>馬名</td><td>オッズ</td><td>ゆま</td><td>期待値</td>";
+        echo "<td>馬番</td><td>馬名</td><td>オッズ</td><td>ゆま</td><td>期待値</td><td>補正後勝率</td><td>コスト</td><td>配当想定</td>";
         echo "</tr>";
         // odds_infoは$i, win_rates,umabansは$j
         for ($i=0;$i<$max_i;$i++) {
             echo "<tr>";
             if (count($odds_info) > $i) {
-                // オッズは最後の5分でガクッと下がるので低めに見積もる
-                $actual_odds = round(floatval($odds_info[$i]["odds"])*$odds_damping_ratio, 1);
                 echo "<td align=right>".$odds_info[$i]["umaban"]."</td>";
                 echo "<td align=center>".$odds_info[$i]["horsename"]."</td>";
-                echo "<td align=right>".$actual_odds."</td>";
+                echo "<td align=right>".$actual_odds[$i]."</td>";
                 for ($j=0;$j<$max_j;$j++) {
                     if ($umabans[$j] == $odds_info[$i]["umaban"]) {
-                        $exp = $actual_odds*floatval($win_rates[$j])/100;
-                        $memo = "";
-                        $cost = intval($exp*(self::DIVIDEND_CRITERIA/100) / $actual_odds)*100+100;
-                        // 期待値0.8以上の馬は買い
-                        if ($exp >= self::BUY_EXP_CRITERIA) {
-                            $memo = "☆☆";
-                            $win_criteria += floatval($win_rates[$j]);
-                            $exp_dividend += $actual_odds*$cost*(floatval($win_rates[$j])/100);
+                        if ($actual_odds[$i] != -1) {
                             $auto_buy_array['umaban'][] = $odds_info[$i]['umaban'];
-                            $auto_buy_array['buy'][] = $cost/100;
-                        } else {
-                            $cost = 0;
-                            // オッズ3倍を切るような馬が、ギリギリ買えないような期待値だった場合にカウント
-                            if ($exp >= 0.4 && $exp < self::BUY_EXP_CRITERIA && $actual_odds < 2.8) {
-                                $bad_exp_count += 1;
-                            }
+                            $auto_buy_array['buy'][] = $cost[$i]/100;
                         }
-                        $total_cost += $cost;
+                        
                         echo "<td align=right>".$win_rates[$j]."</td>";
-                        echo "<td align=right>".sprintf("%.2f", $exp)."</td>";
-                        echo "<td align=center>".$memo."</td>";
-                        echo "<td align=right>".$cost."</td>";
+                        echo "<td align=right>".sprintf("%.2f", $exp[$i])."</td>";
+                        echo "<td align=right>".$normalized_win_rate[$i]."</td>";
+                        echo "<td align=right>".$cost[$i]."</td>";
+                        echo "<td align=right>".$cost[$i]*$actual_odds[$i]."</td>";
                         break;
                     }
                 }
             }
             echo "</tr>";
         }
-        $judge = $this->is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count);
         echo "</table><br>";
         echo "勝率：".sprintf("%.1f",$win_criteria)."％<br>";
-        echo "コスト：".$total_cost."<br>";
+        echo "コスト：".array_sum($cost)."<br>";
         echo "期待値：".round($exp_dividend,0)."<br>";
-        echo "目標期待値に対する期待値比：".round($exp_dividend/self::DIVIDEND_CRITERIA*100,1)."％(100％以下は✕)<br>";
-        echo "目標期待値に対するコスト比：".round($total_cost/self::DIVIDEND_CRITERIA*100,1)."％(75％以上は✕)<br>";
-        echo "コスト期待値比：".round($exp_dividend/$total_cost,1)."(1.5以上で◎)<br>";
+        echo "コスト期待値比：".round($exp_dividend/array_sum($cost),1)."(1.3以上で◎)<br>";
         echo "人気で期待値が惜しい馬：".$bad_exp_count."頭<br>";
+        $judge = $this->is_pass_buyable_criteria($exp_dividend, array_sum($cost), $win_criteria, $bad_exp_count);
         echo "購入判定：".$judge."<br>";
         if ($judge == "NG") {
             unset($auto_buy_array['umaban']);
@@ -382,14 +402,10 @@ class YumaAnalysisController extends Controller
         file_put_contents(self::DOWNLOAD_PATH."auto_buy.json", $json);
     }
     // 購入基準を満たす場合trueを返す
-    // 高確率で勝つ低期待値人気馬が不在で、期待値が目標期待値を上回っているか(コスト上限あり)、期待値コスト比が1.3超(コスト条件なし)
-    private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_criteria, $bad_exp_count) {
-        if ($total_cost <= self::DIVIDEND_CRITERIA*1.0 && $bad_exp_count < 1 && 
-            (
-             $exp_dividend > self::DIVIDEND_CRITERIA*1.0 && $total_cost <= self::UPPER_COST || 
-             $exp_dividend/$total_cost > 1.3
-            )
-        ) {
+    // 期待値1未満勝率20%以上が2頭以上いたら期待値が低いので却下
+    // 期待値コスト比が1.3未満、勝率4割未満は却下
+    private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_rate, $bad_exp_count) {
+        if ($bad_exp_count < 2 && $exp_dividend/$total_cost >= 1.3 && $win_rate >= 40.0) {
             return "OK";
         } else {
             return "NG";
