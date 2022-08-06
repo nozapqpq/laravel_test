@@ -403,9 +403,9 @@ class YumaAnalysisController extends Controller
     }
     // 購入基準を満たす場合trueを返す
     // 期待値1未満勝率20%以上が2頭以上いたら期待値が低いので却下
-    // 期待値コスト比が1.3未満、勝率4割未満は却下
+    // 期待値コスト比が1.3未満、勝率2割未満は却下
     private function is_pass_buyable_criteria($exp_dividend, $total_cost, $win_rate, $bad_exp_count) {
-        if ($bad_exp_count < 2 && $exp_dividend/$total_cost >= 1.3 && $win_rate >= 40.0) {
+        if ($bad_exp_count < 2 && $exp_dividend/$total_cost >= 1.3 && $win_rate >= 20.0) {
             return "OK";
         } else {
             return "NG";
